@@ -1,0 +1,196 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+}
+
+body{
+    background:#edf3ff;
+    min-height:100vh;
+}
+
+/* ---------- Login & Register ---------- */
+
+.auth-page{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+}
+
+.container{
+    width:420px;
+    background:#fff;
+    padding:40px;
+    border-radius:18px;
+    box-shadow:0 12px 30px rgba(0,0,0,.15);
+}
+
+.container h2{
+    text-align:center;
+    color:#2563eb;
+    margin-bottom:25px;
+}
+
+input,
+textarea,
+select{
+    width:100%;
+    padding:14px;
+    margin:12px 0;
+    border:1px solid #ccc;
+    border-radius:8px;
+    font-size:16px;
+}
+
+input:focus,
+textarea:focus,
+select:focus{
+    outline:none;
+    border-color:#2563eb;
+}
+
+button{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:8px;
+    background:#2563eb;
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+    transition:.3s;
+}
+
+button:hover{
+    background:#1d4ed8;
+}
+
+.logout-btn{
+    width:auto;
+    background:#ef4444;
+    padding:12px 24px;
+}
+
+.logout-btn:hover{
+    background:#dc2626;
+}
+
+a{
+    color:#2563eb;
+    text-decoration:none;
+    font-weight:bold;
+}
+
+p{
+    text-align:center;
+    margin-top:15px;
+}
+
+/* ---------- Dashboard ---------- */
+
+.dashboard{
+    max-width:1200px;
+    margin:40px auto;
+    background:white;
+    border-radius:18px;
+    padding:40px;
+    box-shadow:0 10px 25px rgba(0,0,0,.12);
+}
+
+.dashboard-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:30px;
+}
+
+.dashboard h1{
+    color:#2563eb;
+}
+
+.card-container{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:25px;
+}
+
+.card{
+    background:white;
+    border-radius:16px;
+    padding:30px;
+    text-align:center;
+    box-shadow:0 8px 18px rgba(0,0,0,.12);
+}
+
+.card h2{
+    color:#2563eb;
+    margin-bottom:15px;
+}
+
+.card p{
+    margin-bottom:20px;
+}
+
+/* ---------- Tables ---------- */
+
+.table-container{
+    max-width:1200px;
+    margin:40px auto;
+    background:white;
+    border-radius:18px;
+    padding:30px;
+    box-shadow:0 10px 25px rgba(0,0,0,.12);
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+}
+
+th{
+    background:#2563eb;
+    color:white;
+}
+
+th,
+td{
+    border:1px solid #ddd;
+    padding:12px;
+    text-align:center;
+}
+
+tr:nth-child(even){
+    background:#f7f7f7;
+}
+
+.back-btn{
+    width:180px;
+    margin-bottom:20px;
+}
+
+footer{
+
+position:fixed;
+
+bottom:0;
+
+left:0;
+
+width:100%;
+
+padding:18px;
+
+background:#ffffff;
+
+border-top:1px solid #ddd;
+
+text-align:center;
+
+font-size:15px;
+
+color:#666;
+
+}

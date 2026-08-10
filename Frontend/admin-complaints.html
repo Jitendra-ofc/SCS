@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Complaint Manager</title>
+
+<link rel="stylesheet" href="style.css">
+
+<style>
+
+.page{
+    width:95%;
+    max-width:1400px;
+    margin:40px auto;
+}
+
+.header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:30px;
+}
+
+.header button{
+    width:auto;
+    padding:12px 24px;
+}
+
+.controls{
+    display:flex;
+    gap:15px;
+    flex-wrap:wrap;
+    margin-bottom:25px;
+}
+
+.controls input,
+.controls select{
+    width:220px;
+}
+
+.table-card{
+
+    background:white;
+
+    padding:25px;
+
+    border-radius:18px;
+
+    box-shadow:0 10px 25px rgba(0,0,0,.12);
+
+}
+
+table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+}
+
+th{
+
+    background:#2563eb;
+
+    color:white;
+
+    padding:14px;
+
+}
+
+td{
+
+    padding:14px;
+
+    border-bottom:1px solid #eee;
+
+}
+
+tr:hover{
+
+    background:#f8faff;
+
+}
+
+.status{
+
+    color:white;
+
+    padding:7px 14px;
+
+    border-radius:20px;
+
+    font-size:14px;
+
+    font-weight:bold;
+
+}
+
+.pending{
+
+    background:#f59e0b;
+
+}
+
+.progress{
+
+    background:#3b82f6;
+
+}
+
+.resolved{
+
+    background:#16a34a;
+
+}
+
+.update-select{
+
+    width:170px;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="page">
+
+<div class="header">
+
+<h1 style="color:#2563eb">
+
+📋 Complaint Manager
+
+</h1>
+
+<button onclick="location.href='admin-dashboard.html'">
+
+Dashboard
+
+</button>
+
+</div>
+
+<div class="controls">
+
+<input
+
+type="text"
+
+id="search"
+
+placeholder="Search complaint...">
+
+<select id="statusFilter">
+
+<option value="All">All Status</option>
+
+<option>Pending</option>
+
+<option>In Progress</option>
+
+<option>Resolved</option>
+
+</select>
+
+<select id="categoryFilter">
+
+<option value="All">All Categories</option>
+
+<option>Electric</option>
+
+<option>Road</option>
+
+<option>Water</option>
+
+<option>Internet</option>
+
+</select>
+
+</div>
+
+<div class="table-card">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Name</th>
+
+<th>Email</th>
+
+<th>Category</th>
+
+<th>Subject</th>
+
+<th>Status</th>
+
+<th>Update</th>
+
+</tr>
+
+</thead>
+
+<tbody id="complaintsTable">
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<footer>
+
+© 2026 Smart Complaint Management System | Developed by Jitendra
+
+</footer>
+
+<script>
+
+const token=localStorage.getItem("token");
+
+let complaints=[];
+
+async function loadComplaints(){
+
+const res=await fetch("http://localhost:5000/api/complaints",{
+
+headers:{
+Authorization:"Bearer "+token
+}
+
+});
+
+complaints=await res.json();
+
+renderTable();
+
+}
+
+function badge(status){
+
+if(status==="Pending")
+
+return '<span class="status pending">Pending</span>';
+
+if(status==="In Progress")
+
+return '<span class="status progress">In Progress</span>';
+
+return '<span class="status resolved">Resolved</span>';
+
+}
+
+function renderTable(){
+
+const search=document.getElementById("search").value.toLowerCase();
+
+const status=document.getElementById("statusFilter").value;
+
+const category=document.getElementById("categoryFilter").value;
+
+let rows="";
+
+complaints
+
+.filter(c=>{
+
+const matchSearch=
+
+c.name.toLowerCase().includes(search) ||
+
+c.email.toLowerCase().includes(search) ||
+
+c.subject.toLowerCase().includes(search) ||
+
+c.category.toLowerCase().includes(search);
+
+const matchStatus=status==="All" || c.status===status;
+
+const matchCategory=category==="All" || c.category===category;
+
+return matchSearch && matchStatus && matchCategory;
+
+})
+
+.forEach(c=>{
+
+rows+=`
+
+<tr>
+
+<td>${c.name}</td>
+
+<td>${c.email}</td>
+
+<td>${c.category}</td>
+
+<td>${c.subject}</td>
+
+<td>${badge(c.status)}</td>
+
+<td>
+
+<select
+
+class="update-select"
+
+onchange="updateStatus('${c._id}',this.value)">
+
+<option ${c.status==="Pending"?"selected":""}>Pending</option>
+
+<option ${c.status==="In Progress"?"selected":""}>In Progress</option>
+
+<option ${c.status==="Resolved"?"selected":""}>Resolved</option>
+
+</select>
+
+</td>
+
+</tr>
+
+`;
+
+});
+
+document.getElementById("complaintsTable").innerHTML=rows;
+
+}
+
+async function updateStatus(id,status){
+
+await fetch(`http://localhost:5000/api/complaints/${id}`,{
+
+method:"PUT",
+
+headers:{
+
+"Content-Type":"application/json",
+
+Authorization:"Bearer "+token
+
+},
+
+body:JSON.stringify({
+
+status
+
+})
+
+});
+
+loadComplaints();
+
+}
+
+document.getElementById("search").addEventListener("keyup",renderTable);
+
+document.getElementById("statusFilter").addEventListener("change",renderTable);
+
+document.getElementById("categoryFilter").addEventListener("change",renderTable);
+
+loadComplaints();
+
+</script>
+
+</body>
+
+</html>

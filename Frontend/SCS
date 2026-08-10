@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Complaint Management System</title>
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial;
+}
+
+body{
+background:#f4f7fb;
+}
+
+header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:20px 60px;
+background:#0d6efd;
+color:white;
+}
+
+nav a{
+text-decoration:none;
+color:white;
+margin:15px;
+}
+
+.login{
+padding:10px 20px;
+border:none;
+background:white;
+color:#0d6efd;
+border-radius:5px;
+cursor:pointer;
+}
+
+.hero{
+text-align:center;
+padding:80px;
+}
+
+.hero h1{
+font-size:45px;
+margin-bottom:20px;
+}
+
+.hero p{
+font-size:20px;
+margin-bottom:30px;
+}
+
+.hero button{
+padding:15px 35px;
+background:#0d6efd;
+color:white;
+border:none;
+border-radius:8px;
+font-size:18px;
+}
+
+.features{
+display:flex;
+justify-content:center;
+gap:30px;
+padding:40px;
+}
+
+.card{
+width:300px;
+background:white;
+padding:30px;
+border-radius:10px;
+box-shadow:0 5px 15px rgba(0,0,0,.15);
+text-align:center;
+}
+
+footer{
+margin-top:50px;
+padding:20px;
+background:#0d6efd;
+color:white;
+text-align:center;
+}
+</style>
+
+<body>
+
+<header>
+
+<div class="logo">
+<h2>SCMS</h2>
+</div>
+
+<nav>
+
+<a href="#">Home</a>
+<a href="#">About</a>
+<a href="#">Features</a>
+<a href="#">Contact</a>
+
+<button class="login">Login</button>
+
+</nav>
+
+</header>
+
+<section class="hero">
+
+<h1>Smart Complaint Management System</h1>
+
+<p>
+Register complaints, track their progress and resolve issues faster with one centralized platform.
+</p>
+
+<button>Get Started</button>
+
+</section>
+
+<section class="features">
+
+<div class="card">
+
+<h3>Register Complaint</h3>
+
+<p>
+Submit complaints in just a few clicks.
+</p>
+
+</div>
+
+<div class="card">
+
+<h3>Track Status</h3>
+
+<p>
+Know whether your complaint is Pending, In Progress or Resolved.
+</p>
+
+</div>
+
+<div class="card">
+
+<h3>Admin Dashboard</h3>
+
+<p>
+Admins can manage complaints easily.
+</p>
+
+</div>
+
+</section>
+
+<footer>
+
+<p>
+© 2026 Smart Complaint Management System
+</p>
+
+</footer>
+
+</body>
+</html>

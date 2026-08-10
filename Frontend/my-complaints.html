@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>My Complaints</title>
+
+<link rel="stylesheet" href="style.css">
+
+<style>
+
+.page{
+    width:90%;
+    max-width:1200px;
+    margin:40px auto;
+}
+
+.header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:25px;
+}
+
+.back-btn{
+    width:auto;
+    padding:12px 24px;
+}
+
+.table-card{
+    background:white;
+    padding:30px;
+    border-radius:18px;
+    box-shadow:0 10px 25px rgba(0,0,0,.12);
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th{
+    background:#2563eb;
+    color:white;
+}
+
+th,td{
+    padding:14px;
+    text-align:center;
+    border:1px solid #ddd;
+}
+
+.pending{
+    color:#d97706;
+    font-weight:bold;
+}
+
+.progress{
+    color:#2563eb;
+    font-weight:bold;
+}
+
+.resolved{
+    color:#16a34a;
+    font-weight:bold;
+}
+
+footer{
+    margin-top:60px;
+    text-align:center;
+    padding:20px;
+    color:#555;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="page">
+
+    <div class="header">
+
+        <h1 style="color:#2563eb;">📋 My Complaints</h1>
+
+        <button class="back-btn"
+        onclick="location.href='dashboard.html'">
+        Dashboard
+        </button>
+
+    </div>
+
+    <div class="table-card">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>Category</th>
+                    <th>Subject</th>
+                    <th>Status</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody id="complaintsTable">
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+<footer>
+© 2026 Smart Complaint Management System Developed by Jitendra
+</footer>
+
+<script>
+
+const token = localStorage.getItem("token");
+
+async function loadComplaints(){
+
+    try{
+
+        const res = await fetch("http://localhost:5000/api/complaints/my",{
+
+            headers:{
+                Authorization:"Bearer "+token
+            }
+
+        });
+
+        const data = await res.json();
+
+        let rows = "";
+
+        data.forEach(c=>{
+
+            let cls = "pending";
+
+            if(c.status==="In Progress")
+                cls="progress";
+
+            if(c.status==="Resolved")
+                cls="resolved";
+
+            rows += `
+            <tr>
+                <td>${c.category}</td>
+                <td>${c.subject}</td>
+                <td class="${cls}">${c.status}</td>
+            </tr>
+            `;
+
+        });
+
+        document.getElementById("complaintsTable").innerHTML = rows;
+
+    }
+
+    catch(err){
+
+        console.log(err);
+
+    }
+
+}
+
+loadComplaints();
+
+</script>
+
+</body>
+
+</html>

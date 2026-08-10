@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>User Dashboard</title>
+
+<link rel="stylesheet" href="style.css">
+
+<style>
+
+.dashboard{
+    width:90%;
+    max-width:1200px;
+    margin:40px auto;
+}
+
+.dashboard-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:35px;
+}
+
+.dashboard-header h1{
+    color:#2563eb;
+}
+
+.logout-btn{
+    width:auto;
+    padding:12px 25px;
+    background:#ef4444;
+}
+
+.logout-btn:hover{
+    background:#dc2626;
+}
+
+.card-container{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+    gap:25px;
+}
+
+.card{
+    background:white;
+    padding:35px;
+    border-radius:18px;
+    text-align:center;
+    box-shadow:0 10px 25px rgba(0,0,0,.12);
+}
+
+.card h2{
+    color:#2563eb;
+    margin-bottom:15px;
+}
+
+.card p{
+    color:#666;
+    margin-bottom:25px;
+}
+
+.card button{
+    width:200px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="dashboard">
+
+<div class="dashboard-header">
+
+<div>
+
+<h1>
+
+Welcome,
+
+<span id="username"></span>
+
+👋
+
+</h1>
+
+<p>
+
+Smart Complaint Management System
+
+</p>
+
+</div>
+
+<button
+class="logout-btn"
+onclick="logout()">
+
+Logout
+
+</button>
+
+</div>
+
+<div class="card-container">
+
+<div class="card">
+
+<h2>📝 Submit Complaint</h2>
+
+<p>
+
+Register a new complaint quickly.
+
+</p>
+
+<button
+onclick="location.href='complaint.html'">
+
+Open
+
+</button>
+
+</div>
+
+<div class="card">
+
+<h2>📋 My Complaints</h2>
+
+<p>
+
+Track all your submitted complaints.
+
+</p>
+
+<button
+onclick="location.href='my-complaints.html'">
+
+View
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+const user = JSON.parse(localStorage.getItem("user"));
+
+if(!user){
+
+location.href="login.html";
+
+}
+
+document.getElementById("username").innerText=user.fullName;
+
+function logout(){
+
+localStorage.clear();
+
+location.href="login.html";
+
+}
+
+</script>
+
+<footer>
+
+© 2026 Smart Complaint Management System
+
+Developed by Jitendra
+
+</footer>
+
+</body>
+
+</html>
