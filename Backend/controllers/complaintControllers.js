@@ -36,7 +36,7 @@ const createComplaint = async (req, res) => {
 // ==========================================
 // GET ALL COMPLAINTS
 // ==========================================
-const getComplaints = async (req, res) => {
+const getAllComplaints = async (req, res) => {
     try {
         const complaints = await Complaint.find()
             .sort({ createdAt: -1 });
@@ -44,7 +44,7 @@ const getComplaints = async (req, res) => {
         res.status(200).json(complaints);
 
     } catch (error) {
-        console.error("Get Complaints Error:", error);
+        console.error("Get All Complaints Error:", error);
 
         res.status(500).json({
             message: "Failed to fetch complaints",
@@ -55,9 +55,9 @@ const getComplaints = async (req, res) => {
 
 
 // ==========================================
-// GET LOGGED-IN USER'S COMPLAINTS
+// GET USER COMPLAINTS
 // ==========================================
-const getMyComplaints = async (req, res) => {
+const getUserComplaints = async (req, res) => {
     try {
         const complaints = await Complaint.find({
             user: req.user.id
@@ -66,10 +66,47 @@ const getMyComplaints = async (req, res) => {
         res.status(200).json(complaints);
 
     } catch (error) {
-        console.error("Get My Complaints Error:", error);
+        console.error("Get User Complaints Error:", error);
 
         res.status(500).json({
             message: "Failed to fetch your complaints",
+            error: error.message
+        });
+    }
+};
+
+
+// ==========================================
+// GET COMPLAINT STATISTICS
+// ==========================================
+const getComplaintStats = async (req, res) => {
+    try {
+        const total = await Complaint.countDocuments();
+
+        const pending = await Complaint.countDocuments({
+            status: "Pending"
+        });
+
+        const resolved = await Complaint.countDocuments({
+            status: "Resolved"
+        });
+
+        const rejected = await Complaint.countDocuments({
+            status: "Rejected"
+        });
+
+        res.status(200).json({
+            total,
+            pending,
+            resolved,
+            rejected
+        });
+
+    } catch (error) {
+        console.error("Get Complaint Stats Error:", error);
+
+        res.status(500).json({
+            message: "Failed to fetch complaint statistics",
             error: error.message
         });
     }
@@ -86,7 +123,10 @@ const updateComplaintStatus = async (req, res) => {
         const complaint = await Complaint.findByIdAndUpdate(
             req.params.id,
             { status },
-            { new: true, runValidators: true }
+            {
+                new: true,
+                runValidators: true
+            }
         );
 
         if (!complaint) {
@@ -146,8 +186,9 @@ const deleteComplaint = async (req, res) => {
 // ==========================================
 module.exports = {
     createComplaint,
-    getComplaints,
-    getMyComplaints,
+    getAllComplaints,
+    getUserComplaints,
+    getComplaintStats,
     updateComplaintStatus,
     deleteComplaint
 };
