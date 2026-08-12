@@ -5,6 +5,20 @@ const Complaint = require("../models/Complaint");
 // ==========================================
 const createComplaint = async (req, res) => {
     try {
+        console.log("Creating complaint for user:", req.user);
+
+        if (!req.user) {
+            return res.status(401).json({
+                message: "User not authenticated"
+            });
+        }
+
+        if (!req.user.name) {
+            return res.status(400).json({
+                message: "User name is missing from authentication token"
+            });
+        }
+
         const complaint = await Complaint.create({
             user: req.user.id,
             name: req.user.name,
@@ -17,16 +31,16 @@ const createComplaint = async (req, res) => {
             status: "Pending"
         });
 
-        res.status(201).json({
+        return res.status(201).json({
             message: "Complaint Submitted Successfully",
             complaint
         });
 
     } catch (error) {
-        console.error("Create Complaint Error:", error);
+        console.error("Create complaint error:", error);
 
-        res.status(400).json({
-            message: "Complaint validation failed",
+        return res.status(500).json({
+            message: "Failed to submit complaint",
             error: error.message
         });
     }
