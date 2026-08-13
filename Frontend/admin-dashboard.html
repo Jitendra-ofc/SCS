@@ -92,16 +92,26 @@
             color: #16a34a;
         }
 
-        @media (max-width: 800px) {
+        @media (max-width: 768px) {
+
             .stats {
                 grid-template-columns: repeat(2, 1fr);
             }
+
         }
 
         @media (max-width: 500px) {
+
             .stats {
                 grid-template-columns: 1fr;
             }
+
+            .dashboard-header {
+                flex-direction: column;
+                gap: 20px;
+                align-items: flex-start;
+            }
+
         }
 
     </style>
@@ -179,6 +189,7 @@
 
     <script>
 
+        // Get admin token
         const token = localStorage.getItem("token");
 
         // Your deployed Render backend API
@@ -189,10 +200,16 @@
 
             try {
 
+                // Check if admin is logged in
                 if (!token) {
-                    console.error("No admin token found");
 
-                    window.location.href = "admin-login.html";
+                    console.log("No token found");
+
+                    document.getElementById("total").innerText = 0;
+                    document.getElementById("pending").innerText = 0;
+                    document.getElementById("progress").innerText = 0;
+                    document.getElementById("resolved").innerText = 0;
+
                     return;
                 }
 
@@ -202,15 +219,13 @@
                     method: "GET",
 
                     headers: {
-                        Authorization: "Bearer " + token
+                        "Authorization": "Bearer " + token
                     }
 
                 });
 
 
                 if (!res.ok) {
-
-                    console.error("Failed to load stats. Status:", res.status);
 
                     throw new Error("Failed to load dashboard statistics");
 
@@ -219,9 +234,10 @@
 
                 const data = await res.json();
 
-                console.log("Dashboard stats:", data);
+                console.log("Stats from backend:", data);
 
 
+                // Update dashboard counts
                 document.getElementById("total").innerText =
                     data.total || 0;
 
@@ -237,9 +253,8 @@
 
             } catch (err) {
 
-                console.error("Dashboard stats error:", err);
+                console.error("Stats error:", err);
 
-                // Keep dashboard values at 0 if API fails
                 document.getElementById("total").innerText = 0;
                 document.getElementById("pending").innerText = 0;
                 document.getElementById("progress").innerText = 0;
@@ -250,6 +265,7 @@
         }
 
 
+        // Load latest statistics when page opens
         loadStats();
 
 
@@ -257,7 +273,7 @@
 
             localStorage.clear();
 
-            window.location.href = "admin-login.html";
+            location.href = "admin-login.html";
 
         }
 
