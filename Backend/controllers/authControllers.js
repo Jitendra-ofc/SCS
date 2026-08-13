@@ -3,11 +3,11 @@ const bcrypt = require("bcryptjs");
 const validator = require("validator");
 const jwt = require("jsonwebtoken");
 
-// Register User
+// ===============================
+// REGISTER USER
+// ===============================
 const registerUser = async (req, res) => {
-
     try {
-
         const { fullName, email, password } = req.body;
 
         if (!fullName || !email || !password) {
@@ -49,96 +49,82 @@ const registerUser = async (req, res) => {
         });
 
     } catch (error) {
+        console.log("REGISTER ERROR:", error);
 
         res.status(500).json({
             message: error.message
         });
-
     }
-
 };
 
-// Login User
+
+// ===============================
+// LOGIN USER
+// ===============================
 const loginUser = async (req, res) => {
-
     try {
-
         const { email, password } = req.body;
 
         if (!email || !password) {
-
             return res.status(400).json({
                 message: "Please fill all fields"
             });
-
         }
 
         const user = await User.findOne({ email });
 
         if (!user) {
-
             return res.status(400).json({
                 message: "User not found"
             });
-
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
 
         if (!isMatch) {
-
             return res.status(400).json({
                 message: "Invalid Password"
             });
-
         }
 
+        // Create JWT token
         const token = jwt.sign(
-
             {
                 id: user._id,
                 fullName: user.fullName,
                 email: user.email,
                 role: user.role
             },
-
             process.env.JWT_SECRET,
-
             {
                 expiresIn: "1d"
             }
-
         );
 
         res.status(200).json({
-
             message: "Login Successful",
-
             token,
-
             user: {
-
                 id: user._id,
                 fullName: user.fullName,
                 email: user.email,
                 role: user.role
-
             }
-
         });
 
-    }
-
-    catch (error) {
+    } catch (error) {
+        console.log("LOGIN ERROR:", error);
 
         res.status(500).json({
             message: error.message
         });
-
     }
-
 };
 
+
+// ===============================
+// EXPORTS
+// ===============================
 module.exports = {
     registerUser,
     loginUser
