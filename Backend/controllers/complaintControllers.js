@@ -7,37 +7,27 @@ const createComplaint = async (req, res) => {
     try {
         console.log("Creating complaint for user:", req.user);
 
-        // Check authentication
         if (!req.user) {
             return res.status(401).json({
                 message: "User not authenticated"
             });
         }
 
-        // Check user full name
         if (!req.user.fullName) {
             return res.status(400).json({
                 message: "User full name is missing from authentication token"
             });
         }
 
-        // Check required complaint fields
-        const { category, subject, description } = req.body;
-
-        if (!category || !subject || !description) {
-            return res.status(400).json({
-                message: "Please fill all complaint fields"
-            });
-        }
-
-        // Create complaint
         const complaint = await Complaint.create({
             user: req.user.id,
             name: req.user.fullName,
             email: req.user.email,
-            category,
-            subject,
-            description,
+
+            category: req.body.category,
+            subject: req.body.subject,
+            description: req.body.description,
+
             status: "Pending"
         });
 
@@ -65,12 +55,12 @@ const getAllComplaints = async (req, res) => {
         const complaints = await Complaint.find()
             .sort({ createdAt: -1 });
 
-        return res.status(200).json(complaints);
+        res.status(200).json(complaints);
 
     } catch (error) {
         console.error("Get All Complaints Error:", error);
 
-        return res.status(500).json({
+        res.status(500).json({
             message: "Failed to fetch complaints",
             error: error.message
         });
@@ -83,16 +73,22 @@ const getAllComplaints = async (req, res) => {
 // ==========================================
 const getUserComplaints = async (req, res) => {
     try {
+        if (!req.user) {
+            return res.status(401).json({
+                message: "User not authenticated"
+            });
+        }
+
         const complaints = await Complaint.find({
             user: req.user.id
         }).sort({ createdAt: -1 });
 
-        return res.status(200).json(complaints);
+        res.status(200).json(complaints);
 
     } catch (error) {
         console.error("Get User Complaints Error:", error);
 
-        return res.status(500).json({
+        res.status(500).json({
             message: "Failed to fetch your complaints",
             error: error.message
         });
@@ -119,7 +115,7 @@ const getComplaintStats = async (req, res) => {
             status: "Resolved"
         });
 
-        return res.status(200).json({
+        res.status(200).json({
             total,
             pending,
             inProgress,
@@ -129,7 +125,7 @@ const getComplaintStats = async (req, res) => {
     } catch (error) {
         console.error("Get Complaint Stats Error:", error);
 
-        return res.status(500).json({
+        res.status(500).json({
             message: "Failed to fetch complaint statistics",
             error: error.message
         });
@@ -143,18 +139,6 @@ const getComplaintStats = async (req, res) => {
 const updateComplaintStatus = async (req, res) => {
     try {
         const { status } = req.body;
-
-        const allowedStatuses = [
-            "Pending",
-            "In Progress",
-            "Resolved"
-        ];
-
-        if (!allowedStatuses.includes(status)) {
-            return res.status(400).json({
-                message: "Invalid complaint status"
-            });
-        }
 
         const complaint = await Complaint.findByIdAndUpdate(
             req.params.id,
@@ -171,7 +155,7 @@ const updateComplaintStatus = async (req, res) => {
             });
         }
 
-        return res.status(200).json({
+        res.status(200).json({
             message: "Complaint status updated successfully",
             complaint
         });
@@ -179,7 +163,7 @@ const updateComplaintStatus = async (req, res) => {
     } catch (error) {
         console.error("Update Complaint Error:", error);
 
-        return res.status(400).json({
+        res.status(400).json({
             message: "Failed to update complaint",
             error: error.message
         });
@@ -202,14 +186,14 @@ const deleteComplaint = async (req, res) => {
             });
         }
 
-        return res.status(200).json({
+        res.status(200).json({
             message: "Complaint deleted successfully"
         });
 
     } catch (error) {
         console.error("Delete Complaint Error:", error);
 
-        return res.status(500).json({
+        res.status(500).json({
             message: "Failed to delete complaint",
             error: error.message
         });
