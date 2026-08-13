@@ -12,25 +12,19 @@ const protect = (req, res, next) => {
 
         const token = authHeader.split(" ")[1];
 
-        const decoded = jwt.verify(
-            token,
-            process.env.JWT_SECRET
-        );
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
         req.user = {
             id: decoded.id,
-            name: decoded.fullName,
             fullName: decoded.fullName,
             email: decoded.email,
             role: decoded.role
         };
 
-        console.log("Authenticated user:", req.user);
-
         next();
 
     } catch (error) {
-        console.error("Authentication error:", error);
+        console.log(error);
 
         return res.status(401).json({
             message: "Invalid Token"
