@@ -93,15 +93,12 @@
         }
 
         @media (max-width: 768px) {
-
             .stats {
                 grid-template-columns: repeat(2, 1fr);
             }
-
         }
 
         @media (max-width: 500px) {
-
             .stats {
                 grid-template-columns: 1fr;
             }
@@ -111,7 +108,6 @@
                 gap: 20px;
                 align-items: flex-start;
             }
-
         }
 
     </style>
@@ -189,10 +185,10 @@
 
     <script>
 
-        // Get admin token
+        // Get login token
         const token = localStorage.getItem("token");
 
-        // Your deployed Render backend API
+        // Deployed Render backend URL
         const API_URL = "https://scs-m5an.onrender.com/api/complaints/stats";
 
 
@@ -200,10 +196,9 @@
 
             try {
 
-                // Check if admin is logged in
                 if (!token) {
 
-                    console.log("No token found");
+                    console.log("No login token found");
 
                     document.getElementById("total").innerText = 0;
                     document.getElementById("pending").innerText = 0;
@@ -227,7 +222,9 @@
 
                 if (!res.ok) {
 
-                    throw new Error("Failed to load dashboard statistics");
+                    throw new Error(
+                        "Failed to load dashboard statistics. Status: " + res.status
+                    );
 
                 }
 
@@ -237,21 +234,29 @@
                 console.log("Stats from backend:", data);
 
 
-                // Update dashboard counts
+                // Update Total
                 document.getElementById("total").innerText =
-                    data.total || 0;
+                    data.total ?? 0;
 
+
+                // Update Pending
                 document.getElementById("pending").innerText =
-                    data.pending || 0;
+                    data.pending ?? 0;
 
+
+                // Update In Progress
+                // Supports both possible backend field names
                 document.getElementById("progress").innerText =
-                    data.progress || 0;
+                    data.inProgress ?? data.progress ?? 0;
 
+
+                // Update Resolved
                 document.getElementById("resolved").innerText =
-                    data.resolved || 0;
+                    data.resolved ?? 0;
 
+            }
 
-            } catch (err) {
+            catch (err) {
 
                 console.error("Stats error:", err);
 
@@ -265,7 +270,7 @@
         }
 
 
-        // Load latest statistics when page opens
+        // Load latest complaint statistics
         loadStats();
 
 
