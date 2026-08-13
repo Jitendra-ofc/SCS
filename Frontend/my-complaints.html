@@ -2,182 +2,262 @@
 <html lang="en">
 
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>My Complaints</title>
+    <title>My Complaints</title>
 
-<link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css">
 
-<style>
+    <!-- SweetAlert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-.page{
-    width:90%;
-    max-width:1200px;
-    margin:40px auto;
-}
+    <style>
+        .page {
+            width: 90%;
+            max-width: 1200px;
+            margin: 40px auto;
+        }
 
-.header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:25px;
-}
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
 
-.back-btn{
-    width:auto;
-    padding:12px 24px;
-}
+        .back-btn {
+            width: auto;
+            padding: 12px 24px;
+        }
 
-.table-card{
-    background:white;
-    padding:30px;
-    border-radius:18px;
-    box-shadow:0 10px 25px rgba(0,0,0,.12);
-}
+        .table-card {
+            background: white;
+            padding: 30px;
+            border-radius: 18px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, .12);
+        }
 
-table{
-    width:100%;
-    border-collapse:collapse;
-}
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
 
-th{
-    background:#2563eb;
-    color:white;
-}
+        th {
+            background: #2563eb;
+            color: white;
+        }
 
-th,td{
-    padding:14px;
-    text-align:center;
-    border:1px solid #ddd;
-}
+        th,
+        td {
+            padding: 14px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
 
-.pending{
-    color:#d97706;
-    font-weight:bold;
-}
+        .pending {
+            color: #d97706;
+            font-weight: bold;
+        }
 
-.progress{
-    color:#2563eb;
-    font-weight:bold;
-}
+        .progress {
+            color: #2563eb;
+            font-weight: bold;
+        }
 
-.resolved{
-    color:#16a34a;
-    font-weight:bold;
-}
+        .resolved {
+            color: #16a34a;
+            font-weight: bold;
+        }
 
-footer{
-    margin-top:60px;
-    text-align:center;
-    padding:20px;
-    color:#555;
-}
-
-</style>
+        footer {
+            margin-top: 60px;
+            text-align: center;
+            padding: 20px;
+            color: #555;
+        }
+    </style>
 
 </head>
 
 <body>
 
-<div class="page">
+    <div class="page">
 
-    <div class="header">
+        <div class="header">
 
-        <h1 style="color:#2563eb;">📋 My Complaints</h1>
+            <h1 style="color:#2563eb;">📋 My Complaints</h1>
 
-        <button class="back-btn"
-        onclick="location.href='dashboard.html'">
-        Dashboard
-        </button>
+            <button
+                class="back-btn"
+                onclick="location.href='dashboard.html'">
+                Dashboard
+            </button>
+
+        </div>
+
+        <div class="table-card">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Subject</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody id="complaintsTable">
+                    <tr>
+                        <td colspan="3">Loading complaints...</td>
+                    </tr>
+                </tbody>
+
+            </table>
+
+        </div>
 
     </div>
 
-    <div class="table-card">
+    <footer>
+        © 2026 Smart Complaint Management System | Developed by Jitendra
+    </footer>
 
-        <table>
 
-            <thead>
+    <script>
 
-                <tr>
+        const token = localStorage.getItem("token");
 
-                    <th>Category</th>
-                    <th>Subject</th>
-                    <th>Status</th>
+        // Your deployed Render backend API
+        const API_URL = "https://scs-m5an.onrender.com/api/complaints/my";
 
-                </tr>
 
-            </thead>
+        async function loadComplaints() {
 
-            <tbody id="complaintsTable">
+            try {
 
-            </tbody>
+                // Check if user is logged in
+                if (!token) {
 
-        </table>
+                    Swal.fire({
+                        icon: "warning",
+                        title: "Login Required",
+                        text: "Please login first."
+                    });
 
-    </div>
+                    setTimeout(() => {
+                        window.location.href = "login.html";
+                    }, 1500);
 
-</div>
+                    return;
+                }
 
-<footer>
-© 2026 Smart Complaint Management System Developed by Jitendra
-</footer>
 
-<script>
+                // Get logged-in user's complaints
+                const res = await fetch(API_URL, {
 
-const token = localStorage.getItem("token");
+                    method: "GET",
 
-async function loadComplaints(){
+                    headers: {
+                        Authorization: "Bearer " + token
+                    }
 
-    try{
+                });
 
-        const res = await fetch("http://localhost:5000/api/complaints/my",{
 
-            headers:{
-                Authorization:"Bearer "+token
+                // Convert response to JSON
+                const data = await res.json();
+
+                console.log("My complaints:", data);
+
+
+                // Check for API errors
+                if (!res.ok) {
+                    throw new Error(
+                        data.message || "Failed to load complaints"
+                    );
+                }
+
+
+                let rows = "";
+
+
+                // If no complaints exist
+                if (!Array.isArray(data) || data.length === 0) {
+
+                    rows = `
+                        <tr>
+                            <td colspan="3">
+                                No complaints found.
+                            </td>
+                        </tr>
+                    `;
+
+                } else {
+
+                    // Display complaints
+                    data.forEach(c => {
+
+                        let cls = "pending";
+
+                        if (c.status === "In Progress") {
+                            cls = "progress";
+                        }
+
+                        if (c.status === "Resolved") {
+                            cls = "resolved";
+                        }
+
+
+                        rows += `
+                            <tr>
+                                <td>${c.category || ""}</td>
+                                <td>${c.subject || ""}</td>
+                                <td class="${cls}">
+                                    ${c.status || "Pending"}
+                                </td>
+                            </tr>
+                        `;
+
+                    });
+
+                }
+
+
+                document.getElementById("complaintsTable").innerHTML = rows;
+
             }
 
-        });
 
-        const data = await res.json();
+            catch (err) {
 
-        let rows = "";
+                console.error("Error loading complaints:", err);
 
-        data.forEach(c=>{
+                document.getElementById("complaintsTable").innerHTML = `
+                    <tr>
+                        <td colspan="3">
+                            Could not load complaints. Please try again.
+                        </td>
+                    </tr>
+                `;
 
-            let cls = "pending";
 
-            if(c.status==="In Progress")
-                cls="progress";
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "Could not load your complaints."
+                });
 
-            if(c.status==="Resolved")
-                cls="resolved";
+            }
 
-            rows += `
-            <tr>
-                <td>${c.category}</td>
-                <td>${c.subject}</td>
-                <td class="${cls}">${c.status}</td>
-            </tr>
-            `;
+        }
 
-        });
 
-        document.getElementById("complaintsTable").innerHTML = rows;
+        // Load complaints when page opens
+        loadComplaints();
 
-    }
-
-    catch(err){
-
-        console.log(err);
-
-    }
-
-}
-
-loadComplaints();
-
-</script>
+    </script>
 
 </body>
 
