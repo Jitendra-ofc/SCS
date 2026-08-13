@@ -7,25 +7,37 @@ const createComplaint = async (req, res) => {
     try {
         console.log("Creating complaint for user:", req.user);
 
+        // Check authentication
         if (!req.user) {
             return res.status(401).json({
                 message: "User not authenticated"
             });
         }
 
+        // Check user full name
         if (!req.user.fullName) {
             return res.status(400).json({
                 message: "User full name is missing from authentication token"
             });
         }
 
+        // Check required complaint fields
+        const { category, subject, description } = req.body;
+
+        if (!category || !subject || !description) {
+            return res.status(400).json({
+                message: "Please fill all complaint fields"
+            });
+        }
+
+        // Create complaint
         const complaint = await Complaint.create({
             user: req.user.id,
             name: req.user.fullName,
             email: req.user.email,
-            category: req.body.category,
-            subject: req.body.subject,
-            description: req.body.description,
+            category,
+            subject,
+            description,
             status: "Pending"
         });
 
@@ -99,19 +111,19 @@ const getComplaintStats = async (req, res) => {
             status: "Pending"
         });
 
-        const resolved = await Complaint.countDocuments({
-            status: "Resolved"
+        const inProgress = await Complaint.countDocuments({
+            status: "In Progress"
         });
 
-        const rejected = await Complaint.countDocuments({
-            status: "Rejected"
+        const resolved = await Complaint.countDocuments({
+            status: "Resolved"
         });
 
         return res.status(200).json({
             total,
             pending,
-            resolved,
-            rejected
+            inProgress,
+            resolved
         });
 
     } catch (error) {
@@ -131,6 +143,18 @@ const getComplaintStats = async (req, res) => {
 const updateComplaintStatus = async (req, res) => {
     try {
         const { status } = req.body;
+
+        const allowedStatuses = [
+            "Pending",
+            "In Progress",
+            "Resolved"
+        ];
+
+        if (!allowedStatuses.includes(status)) {
+            return res.status(400).json({
+                message: "Invalid complaint status"
+            });
+        }
 
         const complaint = await Complaint.findByIdAndUpdate(
             req.params.id,
