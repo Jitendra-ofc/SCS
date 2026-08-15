@@ -8,11 +8,19 @@ const nodemailer = require("nodemailer");
 // EMAIL TRANSPORTER
 // ===============================
 const transporter = nodemailer.createTransport({
-    service: "gmail",
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false,
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
-    }
+    },
+    tls: {
+        rejectUnauthorized: false
+    },
+    connectionTimeout: 30000,
+    greetingTimeout: 30000,
+    socketTimeout: 30000
 });
 
 // ===============================
@@ -38,7 +46,7 @@ const registerUser = async (req, res) => {
 
         if (!validator.isEmail(email)) {
             return res.status(400).json({
-                message: "Invalid Email"
+                message: "Invalid email address"
             });
         }
 
@@ -59,18 +67,19 @@ const registerUser = async (req, res) => {
         const verificationCode = generateCode();
 
         const newUser = await User.create({
-            fullName,
+            fullName: fullName.trim(),
             email: normalizedEmail,
             password: hashedPassword,
             verificationCode,
             verificationCodeExpires: new Date(
                 Date.now() + 10 * 60 * 1000
-            )
+            ),
+            isVerified: false
         });
 
         try {
             await transporter.sendMail({
-                from: process.env.EMAIL_USER,
+                from: `"Smart Complaint System" <${process.env.EMAIL_USER}>`,
                 to: normalizedEmail,
                 subject: "Verify Your Smart Complaint System Account",
                 html: `
@@ -91,9 +100,11 @@ const registerUser = async (req, res) => {
             });
 
         } catch (emailError) {
-            console.error("EMAIL ERROR:", emailError);
+            console.error(
+                "REGISTER EMAIL ERROR:",
+                emailError.message
+            );
 
-            // User is created, so remove them if email sending fails
             await User.findByIdAndDelete(newUser._id);
 
             return res.status(500).json({
@@ -107,7 +118,7 @@ const registerUser = async (req, res) => {
         });
 
     } catch (error) {
-        console.log("REGISTER ERROR:", error);
+        console.error("REGISTER ERROR:", error.message);
 
         res.status(500).json({
             message: "Server error"
@@ -166,7 +177,7 @@ const verifyEmail = async (req, res) => {
         });
 
     } catch (error) {
-        console.log("VERIFY EMAIL ERROR:", error);
+        console.error("VERIFY EMAIL ERROR:", error.message);
 
         res.status(500).json({
             message: "Server error"
@@ -213,29 +224,46 @@ const resendVerificationCode = async (req, res) => {
 
         await user.save();
 
-        await transporter.sendMail({
-            from: process.env.EMAIL_USER,
-            to: user.email,
-            subject: "Your New Verification Code",
-            html: `
-                <h2>Email Verification</h2>
+        try {
+            await transporter.sendMail({
+                from: `"Smart Complaint System" <${process.env.EMAIL_USER}>`,
+                to: user.email,
+                subject: "Your New Verification Code",
+                html: `
+                    <h2>Email Verification</h2>
 
-                <p>Your new verification code is:</p>
+                    <p>Hello ${user.fullName},</p>
 
-                <h1 style="letter-spacing: 5px;">
-                    ${verificationCode}
-                </h1>
+                    <p>Your new verification code is:</p>
 
-                <p>This code expires in 10 minutes.</p>
-            `
-        });
+                    <h1 style="letter-spacing: 5px;">
+                        ${verificationCode}
+                    </h1>
+
+                    <p>This code expires in 10 minutes.</p>
+                `
+            });
+
+        } catch (emailError) {
+            console.error(
+                "RESEND VERIFICATION ERROR:",
+                emailError.message
+            );
+
+            return res.status(500).json({
+                message: "Could not send verification code"
+            });
+        }
 
         res.status(200).json({
             message: "Verification code sent successfully"
         });
 
     } catch (error) {
-        console.log("RESEND VERIFICATION ERROR:", error);
+        console.error(
+            "RESEND VERIFICATION ERROR:",
+            error.message
+        );
 
         res.status(500).json({
             message: "Could not send verification code"
@@ -274,11 +302,10 @@ const loginUser = async (req, res) => {
 
         if (!isMatch) {
             return res.status(400).json({
-                message: "Invalid Password"
+                message: "Invalid password"
             });
         }
 
-        // Block unverified users
         if (!user.isVerified) {
             return res.status(403).json({
                 message: "Please verify your email before logging in.",
@@ -301,7 +328,7 @@ const loginUser = async (req, res) => {
         );
 
         res.status(200).json({
-            message: "Login Successful",
+            message: "Login successful",
             token,
             user: {
                 id: user._id,
@@ -312,7 +339,7 @@ const loginUser = async (req, res) => {
         });
 
     } catch (error) {
-        console.log("LOGIN ERROR:", error);
+        console.error("LOGIN ERROR:", error.message);
 
         res.status(500).json({
             message: "Server error"
@@ -353,33 +380,48 @@ const forgotPassword = async (req, res) => {
 
         await user.save();
 
-        await transporter.sendMail({
-            from: process.env.EMAIL_USER,
-            to: user.email,
-            subject: "Password Reset Code - Smart Complaint System",
-            html: `
-                <h2>Password Reset Request</h2>
+        try {
+            await transporter.sendMail({
+                from: `"Smart Complaint System" <${process.env.EMAIL_USER}>`,
+                to: user.email,
+                subject: "Password Reset Code - Smart Complaint System",
+                html: `
+                    <h2>Password Reset Request</h2>
 
-                <p>Hello ${user.fullName},</p>
+                    <p>Hello ${user.fullName},</p>
 
-                <p>Your password reset code is:</p>
+                    <p>Your password reset code is:</p>
 
-                <h1 style="letter-spacing: 5px;">
-                    ${resetCode}
-                </h1>
+                    <h1 style="letter-spacing: 5px;">
+                        ${resetCode}
+                    </h1>
 
-                <p>This code will expire in 10 minutes.</p>
+                    <p>This code will expire in 10 minutes.</p>
 
-                <p>If you did not request a password reset, please ignore this email.</p>
-            `
-        });
+                    <p>If you did not request a password reset, please ignore this email.</p>
+                `
+            });
+
+        } catch (emailError) {
+            console.error(
+                "FORGOT PASSWORD EMAIL ERROR:",
+                emailError.message
+            );
+
+            return res.status(500).json({
+                message: "Could not send reset code"
+            });
+        }
 
         res.status(200).json({
             message: "Password reset code sent to your email"
         });
 
     } catch (error) {
-        console.log("FORGOT PASSWORD ERROR:", error);
+        console.error(
+            "FORGOT PASSWORD ERROR:",
+            error.message
+        );
 
         res.status(500).json({
             message: "Could not send reset code"
@@ -438,7 +480,7 @@ const resetPassword = async (req, res) => {
         });
 
     } catch (error) {
-        console.log("RESET PASSWORD ERROR:", error);
+        console.error("RESET PASSWORD ERROR:", error.message);
 
         res.status(500).json({
             message: "Server error"
