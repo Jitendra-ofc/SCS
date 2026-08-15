@@ -5,284 +5,462 @@ const BASE_URL = "https://scs-m5an.onrender.com/api";
 const registerForm = document.getElementById("registerForm");
 
 if (registerForm) {
-
     registerForm.addEventListener("submit", async (e) => {
-
         e.preventDefault();
 
-        const fullName = document.getElementById("fullName").value;
-        const email = document.getElementById("email").value;
+        const fullName = document.getElementById("fullName").value.trim();
+        const email = document.getElementById("email").value.trim();
         const password = document.getElementById("password").value;
 
         try {
-
-            const response = await fetch(`${BASE_URL}/auth/register`,{
-
-                method:"POST",
-
-                headers:{
-                    "Content-Type":"application/json"
+            const response = await fetch(`${BASE_URL}/auth/register`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
                 },
-
-                body:JSON.stringify({
+                body: JSON.stringify({
                     fullName,
                     email,
                     password
                 })
-
             });
 
-            const data=await response.json();
+            const data = await response.json();
 
-            if(response.ok){
-
-                Swal.fire({
-
-                    icon:"success",
-
-                    title:"Registration Successful",
-
-                    text:data.message,
-
-                    timer:1800,
-
-                    showConfirmButton:false
-
-                });
-
-                setTimeout(()=>{
-
-                    window.location.href="login.html";
-
-                },1800);
-
-            }
-
-            else{
+            if (response.ok) {
+                localStorage.setItem("verificationEmail", email);
 
                 Swal.fire({
-
-                    icon:"error",
-
-                    title:"Registration Failed",
-
-                    text:data.message
-
+                    icon: "success",
+                    title: "Registration Successful",
+                    text: data.message,
+                    timer: 2500,
+                    showConfirmButton: false
                 });
 
+                setTimeout(() => {
+                    window.location.href = "verify-email.html";
+                }, 2500);
+
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "Registration Failed",
+                    text: data.message
+                });
             }
 
-        }
-
-        catch(error){
-
+        } catch (error) {
             Swal.fire({
-
-                icon:"error",
-
-                title:"Server Error",
-
-                text:error.message
-
+                icon: "error",
+                title: "Server Error",
+                text: "Could not connect to the server."
             });
-
         }
-
     });
-
 }
 
 
 // ================= LOGIN =================
 
-const loginForm=document.getElementById("loginForm");
+const loginForm = document.getElementById("loginForm");
 
-if(loginForm){
+if (loginForm) {
+    loginForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
 
-loginForm.addEventListener("submit",async(e)=>{
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
 
-e.preventDefault();
+        try {
+            const response = await fetch(`${BASE_URL}/auth/login`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    email,
+                    password
+                })
+            });
 
-const email=document.getElementById("email").value;
+            const data = await response.json();
 
-const password=document.getElementById("password").value;
+            if (response.ok) {
+                localStorage.setItem("token", data.token);
+                localStorage.setItem("user", JSON.stringify(data.user));
 
-try{
+                Swal.fire({
+                    icon: "success",
+                    title: "Login Successful",
+                    timer: 1200,
+                    showConfirmButton: false
+                });
 
-const response=await fetch(`${BASE_URL}/auth/login`,{
+                setTimeout(() => {
+                    window.location.href = "dashboard.html";
+                }, 1200);
 
-method:"POST",
+            } else {
 
-headers:{
+                if (data.needsVerification) {
+                    localStorage.setItem(
+                        "verificationEmail",
+                        data.email || email
+                    );
 
-"Content-Type":"application/json"
+                    Swal.fire({
+                        icon: "warning",
+                        title: "Email Not Verified",
+                        text: data.message,
+                        confirmButtonText: "Verify Email"
+                    }).then(() => {
+                        window.location.href = "verify-email.html";
+                    });
 
-},
+                    return;
+                }
 
-body:JSON.stringify({
+                Swal.fire({
+                    icon: "error",
+                    title: "Login Failed",
+                    text: data.message
+                });
+            }
 
-email,
-
-password
-
-})
-
-});
-
-const data=await response.json();
-
-if(response.ok){
-
-localStorage.setItem("token",data.token);
-
-localStorage.setItem("user",JSON.stringify(data.user));
-
-Swal.fire({
-
-icon:"success",
-
-title:"Login Successful",
-
-timer:1200,
-
-showConfirmButton:false
-
-});
-
-setTimeout(()=>{
-
-window.location.href="dashboard.html";
-
-},1200);
-
+        } catch (error) {
+            Swal.fire({
+                icon: "error",
+                title: "Server Error",
+                text: "Could not connect to the server."
+            });
+        }
+    });
 }
-
-else{
-
-Swal.fire({
-
-icon:"error",
-
-title:"Login Failed",
-
-text:data.message
-
-});
-
-}
-
-}
-
-catch(error){
-
-Swal.fire({
-
-icon:"error",
-
-title:"Server Error",
-
-text:error.message
-
-});
-
-}
-
-});
-
-}
-
 
 
 // ================= ADMIN LOGIN =================
 
-const adminLoginForm=document.getElementById("adminLoginForm");
+const adminLoginForm = document.getElementById("adminLoginForm");
 
-if(adminLoginForm){
+if (adminLoginForm) {
+    adminLoginForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
 
-adminLoginForm.addEventListener("submit",async(e)=>{
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
 
-e.preventDefault();
+        try {
+            const response = await fetch(`${BASE_URL}/auth/login`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    email,
+                    password
+                })
+            });
 
-const email=document.getElementById("email").value;
+            const data = await response.json();
 
-const password=document.getElementById("password").value;
+            if (response.ok) {
 
-const response=await fetch(`${BASE_URL}/auth/login`,{
+                if (data.user.role !== "admin") {
+                    return Swal.fire({
+                        icon: "error",
+                        title: "Access Denied",
+                        text: "This account is not an administrator."
+                    });
+                }
 
-method:"POST",
+                localStorage.setItem("token", data.token);
+                localStorage.setItem("user", JSON.stringify(data.user));
 
-headers:{
+                Swal.fire({
+                    icon: "success",
+                    title: "Welcome Admin",
+                    timer: 1200,
+                    showConfirmButton: false
+                });
 
-"Content-Type":"application/json"
+                setTimeout(() => {
+                    window.location.href = "admin-dashboard.html";
+                }, 1200);
 
-},
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "Login Failed",
+                    text: data.message
+                });
+            }
 
-body:JSON.stringify({
-
-email,
-
-password
-
-})
-
-});
-
-const data=await response.json();
-
-if(response.ok){
-
-if(data.user.role!=="admin"){
-
-return Swal.fire({
-
-icon:"error",
-
-title:"Access Denied",
-
-text:"This account is not an administrator."
-
-});
-
+        } catch (error) {
+            Swal.fire({
+                icon: "error",
+                title: "Server Error",
+                text: "Could not connect to the server."
+            });
+        }
+    });
 }
 
-localStorage.setItem("token",data.token);
 
-localStorage.setItem("user",JSON.stringify(data.user));
+// ================= VERIFY EMAIL =================
 
-Swal.fire({
+const verifyEmailForm = document.getElementById("verifyEmailForm");
 
-icon:"success",
+if (verifyEmailForm) {
+    verifyEmailForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
 
-title:"Welcome Admin",
+        const email = document.getElementById("email").value.trim();
+        const code = document.getElementById("code").value.trim();
 
-timer:1200,
+        try {
+            const response = await fetch(`${BASE_URL}/auth/verify-email`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    email,
+                    code
+                })
+            });
 
-showConfirmButton:false
+            const data = await response.json();
 
-});
+            if (response.ok) {
+                localStorage.removeItem("verificationEmail");
 
-setTimeout(()=>{
+                Swal.fire({
+                    icon: "success",
+                    title: "Email Verified!",
+                    text: data.message,
+                    timer: 2000,
+                    showConfirmButton: false
+                });
 
-window.location.href="admin-dashboard.html";
+                setTimeout(() => {
+                    window.location.href = "login.html";
+                }, 2000);
 
-},1200);
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "Verification Failed",
+                    text: data.message
+                });
+            }
 
+        } catch (error) {
+            Swal.fire({
+                icon: "error",
+                title: "Server Error",
+                text: "Could not connect to the server."
+            });
+        }
+    });
 }
 
-else{
 
-Swal.fire({
+// ================= RESEND VERIFICATION =================
 
-icon:"error",
+const resendVerificationForm =
+    document.getElementById("resendVerificationForm");
 
-title:"Login Failed",
+if (resendVerificationForm) {
+    resendVerificationForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
 
-text:data.message
+        const email = document.getElementById("email").value.trim();
 
-});
+        try {
+            const response = await fetch(
+                `${BASE_URL}/auth/resend-verification`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        email
+                    })
+                }
+            );
 
+            const data = await response.json();
+
+            if (response.ok) {
+                localStorage.setItem("verificationEmail", email);
+
+                Swal.fire({
+                    icon: "success",
+                    title: "Code Sent",
+                    text: data.message
+                });
+
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: data.message
+                });
+            }
+
+        } catch (error) {
+            Swal.fire({
+                icon: "error",
+                title: "Server Error",
+                text: "Could not connect to the server."
+            });
+        }
+    });
 }
 
-});
 
+// ================= FORGOT PASSWORD =================
+
+const forgotPasswordForm =
+    document.getElementById("forgotPasswordForm");
+
+if (forgotPasswordForm) {
+    forgotPasswordForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const email = document.getElementById("email").value.trim();
+
+        try {
+            const response = await fetch(
+                `${BASE_URL}/auth/forgot-password`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        email
+                    })
+                }
+            );
+
+            const data = await response.json();
+
+            if (response.ok) {
+                localStorage.setItem("resetEmail", email);
+
+                Swal.fire({
+                    icon: "success",
+                    title: "Reset Code Sent",
+                    text: data.message,
+                    timer: 2200,
+                    showConfirmButton: false
+                });
+
+                setTimeout(() => {
+                    window.location.href = "reset-password.html";
+                }, 2200);
+
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: data.message
+                });
+            }
+
+        } catch (error) {
+            Swal.fire({
+                icon: "error",
+                title: "Server Error",
+                text: "Could not connect to the server."
+            });
+        }
+    });
+}
+
+
+// ================= RESET PASSWORD =================
+
+const resetPasswordForm =
+    document.getElementById("resetPasswordForm");
+
+if (resetPasswordForm) {
+    resetPasswordForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const email = document.getElementById("email").value.trim();
+        const code = document.getElementById("code").value.trim();
+        const newPassword =
+            document.getElementById("newPassword").value;
+        const confirmPassword =
+            document.getElementById("confirmPassword").value;
+
+        if (newPassword !== confirmPassword) {
+            return Swal.fire({
+                icon: "error",
+                title: "Passwords Do Not Match",
+                text: "Please enter the same password in both fields."
+            });
+        }
+
+        if (newPassword.length < 6) {
+            return Swal.fire({
+                icon: "warning",
+                title: "Password Too Short",
+                text: "Password must be at least 6 characters."
+            });
+        }
+
+        try {
+            const response = await fetch(
+                `${BASE_URL}/auth/reset-password`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        email,
+                        code,
+                        newPassword
+                    })
+                }
+            );
+
+            const data = await response.json();
+
+            if (response.ok) {
+                localStorage.removeItem("resetEmail");
+
+                Swal.fire({
+                    icon: "success",
+                    title: "Password Reset Successful",
+                    text: data.message,
+                    timer: 2200,
+                    showConfirmButton: false
+                });
+
+                setTimeout(() => {
+                    window.location.href = "login.html";
+                }, 2200);
+
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "Password Reset Failed",
+                    text: data.message
+                });
+            }
+
+        } catch (error) {
+            Swal.fire({
+                icon: "error",
+                title: "Server Error",
+                text: "Could not connect to the server."
+            });
+        }
+    });
 }

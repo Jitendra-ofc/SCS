@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>User Login</title>
+    <title>Verify Email</title>
 
     <link rel="stylesheet" href="style.css">
 
@@ -18,9 +18,14 @@
 
     <div class="container">
 
-        <h2>🔑 User Login</h2>
+        <h2>📧 Verify Your Email</h2>
 
-        <form id="loginForm">
+        <p style="margin-bottom: 20px;">
+            Enter your email address and the 6-digit verification code
+            sent to your Gmail.
+        </p>
+
+        <form id="verifyEmailForm">
 
             <input
                 type="email"
@@ -30,46 +35,40 @@
             >
 
             <input
-                type="password"
-                id="password"
-                placeholder="Password"
+                type="text"
+                id="code"
+                placeholder="6-Digit Verification Code"
+                maxlength="6"
                 required
             >
 
-            <div style="text-align: right; margin: 5px 0 15px;">
-                <a href="forgot-password.html">
-                    Forgot Password?
-                </a>
-            </div>
-
             <button type="submit">
-                Login
+                Verify Email
             </button>
 
         </form>
 
-        <p id="message"></p>
-
-        <p>
-            Don't have an account?
-            <a href="register.html">Register</a>
-        </p>
-
-        <p style="margin-top: 10px;">
-            Need to verify your email?
-            <a href="verify-email.html">
-                Verify Email
-            </a>
-        </p>
-
-        <p style="margin-top: 10px;">
-            Didn't receive verification code?
+        <p style="margin-top: 20px;">
+            Didn't receive a code?
             <a href="resend-verification.html">
                 Resend Verification Code
             </a>
         </p>
 
+        <p>
+            <a href="login.html">Back to Login</a>
+        </p>
+
     </div>
+
+    <script>
+        // Automatically fill the email used during registration
+        const verificationEmail = localStorage.getItem("verificationEmail");
+
+        if (verificationEmail) {
+            document.getElementById("email").value = verificationEmail;
+        }
+    </script>
 
     <script src="script.js"></script>
 

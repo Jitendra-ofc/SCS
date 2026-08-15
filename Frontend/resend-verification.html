@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Resend Verification Code</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+</head>
+
+<body class="auth-page">
+
+    <div class="container">
+
+        <h2>📧 Resend Verification Code</h2>
+
+        <p style="margin-bottom: 20px;">
+            Enter your registered email address and we will send you a new
+            6-digit verification code.
+        </p>
+
+        <form id="resendVerificationForm">
+
+            <input
+                type="email"
+                id="email"
+                placeholder="Email Address"
+                required
+            >
+
+            <button type="submit">
+                Send New Verification Code
+            </button>
+
+        </form>
+
+        <p style="margin-top: 20px;">
+            Already have a verification code?
+            <a href="verify-email.html">Verify Email</a>
+        </p>
+
+        <p>
+            <a href="login.html">Back to Login</a>
+        </p>
+
+    </div>
+
+    <script>
+        // Automatically fill the email used during registration
+        const verificationEmail = localStorage.getItem("verificationEmail");
+
+        if (verificationEmail) {
+            document.getElementById("email").value = verificationEmail;
+        }
+    </script>
+
+    <script src="script.js"></script>
+
+    <footer>
+        © 2026 Smart Complaint Management System
+        <br>
+        Developed by Jitendra
+    </footer>
+
+</body>
+
+</html>

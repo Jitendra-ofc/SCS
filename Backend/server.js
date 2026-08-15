@@ -3,9 +3,17 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const dns = require("dns");
+
+// Fix DNS lookup for MongoDB Atlas
+dns.setServers([
+    "8.8.8.8",
+    "8.8.4.4"
+]);
 
 const app = express();
 
+// Middleware
 app.use(cors());
 app.use(express.json());
 
@@ -23,7 +31,7 @@ mongoose
         console.log("MongoDB Connected Successfully");
     })
     .catch((error) => {
-        console.error("MongoDB Connection Error:", error.message);
+        console.error("MongoDB Connection Error:", error);
     });
 
 // Server
