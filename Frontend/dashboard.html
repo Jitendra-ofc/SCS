@@ -3,178 +3,189 @@
 
 <head>
 
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>User Dashboard</title>
+<title>User Dashboard</title>
 
-    <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css">
 
-    <style>
+<style>
 
-        .dashboard {
-            width: 90%;
-            max-width: 1200px;
-            margin: 40px auto;
-        }
+.dashboard{
+    width:90%;
+    max-width:1200px;
+    margin:40px auto;
+}
 
-        .dashboard-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 35px;
-        }
+.dashboard-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:35px;
+}
 
-        .dashboard-header h1 {
-            color: #2563eb;
-        }
+.dashboard-header h1{
+    color:#2563eb;
+}
 
-        .logout-btn {
-            width: auto;
-            padding: 12px 25px;
-            background: #ef4444;
-        }
+.logout-btn{
+    width:auto;
+    padding:12px 25px;
+    background:#ef4444;
+}
 
-        .logout-btn:hover {
-            background: #dc2626;
-        }
+.logout-btn:hover{
+    background:#dc2626;
+}
 
-        .card-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-        }
+.card-container{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+    gap:25px;
+}
 
-        .card {
-            background: white;
-            padding: 35px;
-            border-radius: 18px;
-            text-align: center;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, .12);
-        }
+.card{
+    background:white;
+    padding:35px;
+    border-radius:18px;
+    text-align:center;
+    box-shadow:0 10px 25px rgba(0,0,0,.12);
+}
 
-        .card h2 {
-            color: #2563eb;
-            margin-bottom: 15px;
-        }
+.card h2{
+    color:#2563eb;
+    margin-bottom:15px;
+}
 
-        .card p {
-            color: #666;
-            margin-bottom: 25px;
-        }
+.card p{
+    color:#666;
+    margin-bottom:25px;
+}
 
-        .card button {
-            width: 200px;
-        }
+.card button{
+    width:200px;
+}
 
-    </style>
+</style>
 
 </head>
 
 <body>
 
-    <div class="dashboard">
+<div class="dashboard">
 
-        <div class="dashboard-header">
+    <div class="dashboard-header">
 
-            <div>
+        <div>
 
-                <h1>
-                    Welcome,
-                    <span id="username"></span>
-                    👋
-                </h1>
+            <h1>
+                Welcome,
+                <span id="username"></span>
+                👋
+            </h1>
 
-                <p>
-                    Smart Complaint Management System
-                </p>
+            <p>
+                Smart Complaint Management System
+            </p>
 
-            </div>
+        </div>
+
+        <button
+            class="logout-btn"
+            onclick="logout()">
+            Logout
+        </button>
+
+    </div>
+
+
+    <div class="card-container">
+
+        <div class="card">
+
+            <h2>📝 Submit Complaint</h2>
+
+            <p>
+                Register a new complaint quickly.
+            </p>
 
             <button
-                class="logout-btn"
-                onclick="logout()">
-
-                Logout
-
+                onclick="location.href='complaint.html'">
+                Open
             </button>
 
         </div>
 
 
-        <div class="card-container">
+        <div class="card">
 
-            <div class="card">
+            <h2>📋 My Complaints</h2>
 
-                <h2>📝 Submit Complaint</h2>
+            <p>
+                Track all your submitted complaints.
+            </p>
 
-                <p>
-                    Register a new complaint quickly.
-                </p>
-
-                <button
-                    onclick="location.href='complaint.html'">
-
-                    Open
-
-                </button>
-
-            </div>
-
-
-            <div class="card">
-
-                <h2>📋 My Complaints</h2>
-
-                <p>
-                    Track all your submitted complaints.
-                </p>
-
-                <button
-                    onclick="location.href='my-complaints.html'">
-
-                    View
-
-                </button>
-
-            </div>
+            <button
+                onclick="location.href='my-complaints.html'">
+                View
+            </button>
 
         </div>
 
     </div>
 
-
-    <script>
-
-        const user = JSON.parse(localStorage.getItem("user"));
-
-        if (!user) {
-            window.location.href = "login.html";
-        } else {
-            document.getElementById("username").innerText =
-                user.name || "User";
-        }
+</div>
 
 
-        function logout() {
+<script>
 
-            localStorage.removeItem("token");
-            localStorage.removeItem("user");
+const savedUser = localStorage.getItem("user");
 
-            window.location.href = "login.html";
+if (!savedUser) {
 
-        }
+    window.location.href = "login.html";
 
-    </script>
+} else {
+
+    try {
+
+        const user = JSON.parse(savedUser);
+
+        document.getElementById("username").innerText =
+            user.name || "User";
+
+    } catch (error) {
+
+        console.error("USER DATA ERROR:", error);
+
+        localStorage.clear();
+
+        window.location.href = "login.html";
+
+    }
+}
 
 
-    <footer>
+function logout() {
 
-        © 2026 Smart Complaint Management System
-        <br>
-        Developed by Jitendra
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
 
-    </footer>
+    window.location.href = "login.html";
+
+}
+
+</script>
+
+
+<footer>
+
+© 2026 Smart Complaint Management System
+<br>
+Developed by Jitendra
+
+</footer>
 
 </body>
 

@@ -1,5 +1,6 @@
 const BASE_URL = "https://scs-m5an.onrender.com/api";
 
+
 // ================= REGISTER =================
 
 const registerForm = document.getElementById("registerForm");
@@ -8,7 +9,7 @@ if (registerForm) {
     registerForm.addEventListener("submit", async (e) => {
         e.preventDefault();
 
-        const fullName = document.getElementById("fullName").value.trim();
+        const name = document.getElementById("fullName").value.trim();
         const email = document.getElementById("email").value.trim();
         const password = document.getElementById("password").value;
 
@@ -19,21 +20,22 @@ if (registerForm) {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    name: fullName,
-                    email: email,
-                    password: password
+                    name,
+                    email,
+                    password
                 })
             });
 
             const data = await response.json();
 
             if (response.ok) {
+
                 localStorage.setItem("verificationEmail", email);
 
                 Swal.fire({
                     icon: "success",
                     title: "Registration Successful",
-                    text: data.message,
+                    text: data.message || "Please verify your email.",
                     timer: 2500,
                     showConfirmButton: false
                 });
@@ -43,14 +45,17 @@ if (registerForm) {
                 }, 2500);
 
             } else {
+
                 Swal.fire({
                     icon: "error",
                     title: "Registration Failed",
                     text: data.message || "Registration failed"
                 });
+
             }
 
         } catch (error) {
+
             console.error("REGISTER ERROR:", error);
 
             Swal.fire({
@@ -58,6 +63,7 @@ if (registerForm) {
                 title: "Server Error",
                 text: "Could not connect to the server."
             });
+
         }
     });
 }
@@ -81,16 +87,30 @@ if (loginForm) {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    email: email,
-                    password: password
+                    email,
+                    password
                 })
             });
 
             const data = await response.json();
 
             if (response.ok) {
+
+                // Save token
                 localStorage.setItem("token", data.token);
-                localStorage.setItem("user", JSON.stringify(data.user));
+
+                // Save user with consistent name field
+                const user = {
+                    id: data.user?.id || data.user?._id || "",
+                    name: data.user?.name || "",
+                    email: data.user?.email || "",
+                    role: data.user?.role || "user"
+                };
+
+                localStorage.setItem(
+                    "user",
+                    JSON.stringify(user)
+                );
 
                 Swal.fire({
                     icon: "success",
@@ -106,6 +126,7 @@ if (loginForm) {
             } else {
 
                 if (data.needsVerification) {
+
                     localStorage.setItem(
                         "verificationEmail",
                         data.email || email
@@ -114,7 +135,7 @@ if (loginForm) {
                     Swal.fire({
                         icon: "warning",
                         title: "Email Not Verified",
-                        text: data.message,
+                        text: data.message || "Please verify your email.",
                         confirmButtonText: "Verify Email"
                     }).then(() => {
                         window.location.href = "verify-email.html";
@@ -128,9 +149,11 @@ if (loginForm) {
                     title: "Login Failed",
                     text: data.message || "Login failed"
                 });
+
             }
 
         } catch (error) {
+
             console.error("LOGIN ERROR:", error);
 
             Swal.fire({
@@ -138,6 +161,7 @@ if (loginForm) {
                 title: "Server Error",
                 text: "Could not connect to the server."
             });
+
         }
     });
 }
@@ -145,7 +169,8 @@ if (loginForm) {
 
 // ================= ADMIN LOGIN =================
 
-const adminLoginForm = document.getElementById("adminLoginForm");
+const adminLoginForm =
+    document.getElementById("adminLoginForm");
 
 if (adminLoginForm) {
     adminLoginForm.addEventListener("submit", async (e) => {
@@ -161,8 +186,8 @@ if (adminLoginForm) {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    email: email,
-                    password: password
+                    email,
+                    password
                 })
             });
 
@@ -171,15 +196,28 @@ if (adminLoginForm) {
             if (response.ok) {
 
                 if (!data.user || data.user.role !== "admin") {
+
                     return Swal.fire({
                         icon: "error",
                         title: "Access Denied",
                         text: "This account is not an administrator."
                     });
+
                 }
 
+                const user = {
+                    id: data.user.id || data.user._id || "",
+                    name: data.user.name || "",
+                    email: data.user.email || "",
+                    role: data.user.role
+                };
+
                 localStorage.setItem("token", data.token);
-                localStorage.setItem("user", JSON.stringify(data.user));
+
+                localStorage.setItem(
+                    "user",
+                    JSON.stringify(user)
+                );
 
                 Swal.fire({
                     icon: "success",
@@ -193,14 +231,17 @@ if (adminLoginForm) {
                 }, 1200);
 
             } else {
+
                 Swal.fire({
                     icon: "error",
                     title: "Login Failed",
                     text: data.message || "Login failed"
                 });
+
             }
 
         } catch (error) {
+
             console.error("ADMIN LOGIN ERROR:", error);
 
             Swal.fire({
@@ -208,6 +249,7 @@ if (adminLoginForm) {
                 title: "Server Error",
                 text: "Could not connect to the server."
             });
+
         }
     });
 }
@@ -215,7 +257,8 @@ if (adminLoginForm) {
 
 // ================= VERIFY EMAIL =================
 
-const verifyEmailForm = document.getElementById("verifyEmailForm");
+const verifyEmailForm =
+    document.getElementById("verifyEmailForm");
 
 if (verifyEmailForm) {
     verifyEmailForm.addEventListener("submit", async (e) => {
@@ -231,14 +274,15 @@ if (verifyEmailForm) {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    email: email,
-                    code: code
+                    email,
+                    code
                 })
             });
 
             const data = await response.json();
 
             if (response.ok) {
+
                 localStorage.removeItem("verificationEmail");
 
                 Swal.fire({
@@ -254,19 +298,25 @@ if (verifyEmailForm) {
                 }, 2000);
 
             } else {
+
                 Swal.fire({
                     icon: "error",
                     title: "Verification Failed",
-                    text: data.message
+                    text: data.message || "Verification failed"
                 });
+
             }
 
         } catch (error) {
+
+            console.error("VERIFY EMAIL ERROR:", error);
+
             Swal.fire({
                 icon: "error",
                 title: "Server Error",
                 text: "Could not connect to the server."
             });
+
         }
     });
 }
@@ -292,7 +342,7 @@ if (resendVerificationForm) {
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
-                        email: email
+                        email
                     })
                 }
             );
@@ -300,7 +350,11 @@ if (resendVerificationForm) {
             const data = await response.json();
 
             if (response.ok) {
-                localStorage.setItem("verificationEmail", email);
+
+                localStorage.setItem(
+                    "verificationEmail",
+                    email
+                );
 
                 Swal.fire({
                     icon: "success",
@@ -309,19 +363,25 @@ if (resendVerificationForm) {
                 });
 
             } else {
+
                 Swal.fire({
                     icon: "error",
                     title: "Error",
-                    text: data.message
+                    text: data.message || "Could not resend code"
                 });
+
             }
 
         } catch (error) {
+
+            console.error("RESEND ERROR:", error);
+
             Swal.fire({
                 icon: "error",
                 title: "Server Error",
                 text: "Could not connect to the server."
             });
+
         }
     });
 }
@@ -347,7 +407,7 @@ if (forgotPasswordForm) {
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
-                        email: email
+                        email
                     })
                 }
             );
@@ -355,7 +415,11 @@ if (forgotPasswordForm) {
             const data = await response.json();
 
             if (response.ok) {
-                localStorage.setItem("resetEmail", email);
+
+                localStorage.setItem(
+                    "resetEmail",
+                    email
+                );
 
                 Swal.fire({
                     icon: "success",
@@ -370,19 +434,25 @@ if (forgotPasswordForm) {
                 }, 2200);
 
             } else {
+
                 Swal.fire({
                     icon: "error",
                     title: "Error",
-                    text: data.message
+                    text: data.message || "Could not send reset code"
                 });
+
             }
 
         } catch (error) {
+
+            console.error("FORGOT PASSWORD ERROR:", error);
+
             Swal.fire({
                 icon: "error",
                 title: "Server Error",
                 text: "Could not connect to the server."
             });
+
         }
     });
 }
@@ -399,25 +469,31 @@ if (resetPasswordForm) {
 
         const email = document.getElementById("email").value.trim();
         const code = document.getElementById("code").value.trim();
+
         const newPassword =
             document.getElementById("newPassword").value;
+
         const confirmPassword =
             document.getElementById("confirmPassword").value;
 
         if (newPassword !== confirmPassword) {
+
             return Swal.fire({
                 icon: "error",
                 title: "Passwords Do Not Match",
                 text: "Please enter the same password in both fields."
             });
+
         }
 
         if (newPassword.length < 6) {
+
             return Swal.fire({
                 icon: "warning",
                 title: "Password Too Short",
                 text: "Password must be at least 6 characters."
             });
+
         }
 
         try {
@@ -429,9 +505,9 @@ if (resetPasswordForm) {
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
-                        email: email,
-                        code: code,
-                        newPassword: newPassword
+                        email,
+                        code,
+                        newPassword
                     })
                 }
             );
@@ -439,6 +515,7 @@ if (resetPasswordForm) {
             const data = await response.json();
 
             if (response.ok) {
+
                 localStorage.removeItem("resetEmail");
 
                 Swal.fire({
@@ -454,19 +531,25 @@ if (resetPasswordForm) {
                 }, 2200);
 
             } else {
+
                 Swal.fire({
                     icon: "error",
                     title: "Password Reset Failed",
-                    text: data.message
+                    text: data.message || "Password reset failed"
                 });
+
             }
 
         } catch (error) {
+
+            console.error("RESET PASSWORD ERROR:", error);
+
             Swal.fire({
                 icon: "error",
                 title: "Server Error",
                 text: "Could not connect to the server."
             });
+
         }
     });
 }
