@@ -395,6 +395,9 @@ const resendVerificationCode = async (req, res) => {
     try {
         const { email } = req.body;
 
+        console.log("RESEND REQUEST RECEIVED");
+        console.log("Email:", email);
+
         if (!email) {
             return res.status(400).json({
                 success: false,
@@ -402,44 +405,67 @@ const resendVerificationCode = async (req, res) => {
             });
         }
 
-        // FIND USER
+        const normalizedEmail = email.trim().toLowerCase();
+
+        console.log("Searching for user:", normalizedEmail);
+
         const user = await User.findOne({
-            email: email.toLowerCase(),
+            email: normalizedEmail,
         });
 
         if (!user) {
+            console.log("RESEND ERROR: User not found");
+
             return res.status(404).json({
                 success: false,
                 message: "User not found",
             });
         }
 
+        console.log("User found:", user.email);
+        console.log("User verified:", user.isVerified);
+
         if (user.isVerified) {
             return res.status(400).json({
                 success: false,
-                message:
-                    "This email is already verified",
+                message: "This email is already verified",
             });
         }
 
-        // GENERATE NEW CODE
         const verificationCode = generateVerificationCode();
 
-        user.verificationCode = verificationCode;
-        user.verificationCodeExpires = new Date(
+        console.log("New verification code generated");
+
+        const verificationCodeExpires = new Date(
             Date.now() + 10 * 60 * 1000
         );
 
-        await user.save();
+        // Update only verification fields.
+        // This avoids validating old incomplete fields
+        // such as a missing name in an existing MongoDB document.
+        await User.updateOne(
+            {
+                _id: user._id,
+            },
+            {
+                $set: {
+                    verificationCode: verificationCode,
+                    verificationCodeExpires: verificationCodeExpires,
+                },
+            }
+        );
 
-        // SEND EMAIL
+        console.log("Verification code saved successfully");
+
+        console.log("Attempting to send email through Brevo...");
+
         await sendEmail(
             user.email,
             "Your New Verification Code",
             `
             <h2>Email Verification</h2>
 
-            <p>Hello ${user.name},</p>
+            <p>Hello ${user.name || "User"},</p>
 
             <p>Your new verification code is:</p>
 
@@ -449,23 +475,29 @@ const resendVerificationCode = async (req, res) => {
             `
         );
 
+        console.log(
+            "RESEND SUCCESS: Email sent successfully to",
+            user.email
+        );
+
         return res.status(200).json({
             success: true,
-            message:
-                "New verification code sent successfully",
+            message: "New verification code sent successfully",
         });
 
     } catch (error) {
-        console.error(
-            "RESEND VERIFICATION ERROR:",
-            error
-        );
+
+        console.error("=================================");
+        console.error("RESEND VERIFICATION ERROR");
+        console.error("Message:", error.message);
+        console.error("Code:", error.code);
+        console.error("Response Code:", error.responseCode);
+        console.error("Full Error:", error);
+        console.error("=================================");
 
         return res.status(500).json({
             success: false,
-            message:
-                "Failed to resend verification code",
-            error: error.message,
+            message: "Failed to resend verification code",
         });
     }
 };
