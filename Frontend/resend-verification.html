@@ -180,11 +180,11 @@
     <script>
 
         // ==========================================
-        // BACKEND API URL
+        // CORRECT BACKEND API URL
         // ==========================================
 
         const API_URL =
-            "https://scs-web-service.onrender.com/api/auth/resend-verification";
+            "https://scs-m5an.onrender.com/api/auth/resend-verification";
 
 
         // ==========================================
@@ -202,7 +202,7 @@
 
         resendBtn.addEventListener("click", async function () {
 
-            const email = emailInput.value.trim();
+            const email = emailInput.value.trim().toLowerCase();
 
 
             // Clear previous message
@@ -253,17 +253,21 @@
                 });
 
 
+                // Read response safely
                 const data = await response.json();
 
 
-                console.log("Server response:", data);
+                console.log(
+                    "Server response:",
+                    data
+                );
 
 
-                if (response.ok) {
+                if (response.ok && data.success) {
 
                     message.textContent =
                         data.message ||
-                        "Verification code sent successfully! Check your email.";
+                        "New verification code sent successfully. Check your email.";
 
                     message.classList.add("success");
 
@@ -291,13 +295,14 @@
 
                 message.classList.add("error");
 
+            } finally {
+
+                // Enable button again
+                resendBtn.disabled = false;
+
+                resendBtn.textContent = originalText;
+
             }
-
-
-            // Enable button again
-            resendBtn.disabled = false;
-
-            resendBtn.textContent = originalText;
 
         });
 

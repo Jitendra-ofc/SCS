@@ -395,7 +395,6 @@ const resendVerificationCode = async (req, res) => {
     try {
         const { email } = req.body;
 
-
         if (!email) {
             return res.status(400).json({
                 success: false,
@@ -403,12 +402,10 @@ const resendVerificationCode = async (req, res) => {
             });
         }
 
-
         // FIND USER
         const user = await User.findOne({
             email: email.toLowerCase(),
         });
-
 
         if (!user) {
             return res.status(404).json({
@@ -416,7 +413,6 @@ const resendVerificationCode = async (req, res) => {
                 message: "User not found",
             });
         }
-
 
         if (user.isVerified) {
             return res.status(400).json({
@@ -426,19 +422,15 @@ const resendVerificationCode = async (req, res) => {
             });
         }
 
-
         // GENERATE NEW CODE
         const verificationCode = generateVerificationCode();
-
 
         user.verificationCode = verificationCode;
         user.verificationCodeExpires = new Date(
             Date.now() + 10 * 60 * 1000
         );
 
-
         await user.save();
-
 
         // SEND EMAIL
         await sendEmail(
@@ -456,7 +448,6 @@ const resendVerificationCode = async (req, res) => {
             <p>This code expires in 10 minutes.</p>
             `
         );
-
 
         return res.status(200).json({
             success: true,
