@@ -9,13 +9,17 @@ const nodemailer = require("nodemailer");
 // ==========================================
 
 const transporter = nodemailer.createTransport({
-    host: process.env.BREVO_SMTP_HOST,
-    port: Number(process.env.BREVO_SMTP_PORT),
+    host: "smtp-relay.brevo.com",
+    port: 587,
     secure: false,
+    requireTLS: true,
     auth: {
         user: process.env.BREVO_SMTP_USER,
         pass: process.env.BREVO_SMTP_PASS,
     },
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
 });
 
 
@@ -40,17 +44,29 @@ const generateToken = (id) => {
 
 const sendEmail = async (to, subject, html) => {
     try {
-        await transporter.sendMail({
+        console.log("EMAIL: Connecting to Brevo SMTP...");
+        console.log("EMAIL: Sending to:", to);
+
+        const info = await transporter.sendMail({
             from: process.env.EMAIL_FROM || process.env.BREVO_SMTP_USER,
-            to,
-            subject,
-            html,
+            to: to,
+            subject: subject,
+            html: html,
         });
 
-        console.log(`Email sent successfully to ${to}`);
+        console.log("EMAIL SENT SUCCESSFULLY");
+        console.log("Message ID:", info.messageId);
+
+        return info;
 
     } catch (error) {
-        console.error("EMAIL ERROR:", error.message);
+        console.error("=================================");
+        console.error("BREVO EMAIL ERROR");
+        console.error("Message:", error.message);
+        console.error("Code:", error.code);
+        console.error("Command:", error.command);
+        console.error("=================================");
+
         throw error;
     }
 };
