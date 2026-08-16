@@ -7,9 +7,13 @@ const jwt = require("jsonwebtoken");
 // GENERATE JWT TOKEN
 // ==========================================
 
-const generateToken = (id) => {
+const generateToken = (user) => {
     return jwt.sign(
-        { id },
+        {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+        },
         process.env.JWT_SECRET,
         {
             expiresIn: "7d",
@@ -113,7 +117,10 @@ const registerUser = async (req, res) => {
             });
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(
+            password,
+            10
+        );
 
         const user = await User.create({
             name: name.trim(),
@@ -124,6 +131,7 @@ const registerUser = async (req, res) => {
         return res.status(201).json({
             success: true,
             message: "Registration successful. You can now login.",
+
             user: {
                 id: user._id,
                 name: user.name,
@@ -184,12 +192,14 @@ const loginUser = async (req, res) => {
             });
         }
 
-        const token = generateToken(user._id);
+        const token = generateToken(user);
 
         return res.status(200).json({
             success: true,
             message: "Login successful",
+
             token,
+
             user: {
                 id: user._id,
                 name: user.name,
@@ -252,8 +262,8 @@ const forgotPassword = async (req, res) => {
             Date.now() + 10 * 60 * 1000
         );
 
-        // IMPORTANT:
-        // updateOne avoids validation problems with old users
+        // Use updateOne to avoid validation problems
+        // with old users in the database
         await User.updateOne(
             {
                 _id: user._id,
@@ -340,14 +350,16 @@ const resetPassword = async (req, res) => {
         if (!email || !code || !newPassword) {
             return res.status(400).json({
                 success: false,
-                message: "Email, reset code and new password are required",
+                message:
+                    "Email, reset code and new password are required",
             });
         }
 
         if (newPassword.length < 6) {
             return res.status(400).json({
                 success: false,
-                message: "Password must contain at least 6 characters",
+                message:
+                    "Password must contain at least 6 characters",
             });
         }
 
@@ -364,14 +376,16 @@ const resetPassword = async (req, res) => {
             });
         }
 
-        // Check reset code
+        // Check whether reset code exists
         if (!user.resetCode) {
             return res.status(400).json({
                 success: false,
-                message: "Please request a password reset code first",
+                message:
+                    "Please request a password reset code first",
             });
         }
 
+        // Check reset code
         if (user.resetCode !== code.trim()) {
             return res.status(400).json({
                 success: false,
@@ -386,7 +400,8 @@ const resetPassword = async (req, res) => {
         ) {
             return res.status(400).json({
                 success: false,
-                message: "Reset code has expired. Please request a new code.",
+                message:
+                    "Reset code has expired. Please request a new code.",
             });
         }
 
@@ -420,7 +435,8 @@ const resetPassword = async (req, res) => {
 
         return res.status(200).json({
             success: true,
-            message: "Password reset successful. Please login with your new password.",
+            message:
+                "Password reset successful. Please login with your new password.",
         });
 
     } catch (error) {
