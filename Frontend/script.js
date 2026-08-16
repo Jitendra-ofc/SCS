@@ -19,9 +19,9 @@ if (registerForm) {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    fullName,
-                    email,
-                    password
+                    name: fullName,
+                    email: email,
+                    password: password
                 })
             });
 
@@ -46,11 +46,13 @@ if (registerForm) {
                 Swal.fire({
                     icon: "error",
                     title: "Registration Failed",
-                    text: data.message
+                    text: data.message || "Registration failed"
                 });
             }
 
         } catch (error) {
+            console.error("REGISTER ERROR:", error);
+
             Swal.fire({
                 icon: "error",
                 title: "Server Error",
@@ -79,8 +81,8 @@ if (loginForm) {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    email,
-                    password
+                    email: email,
+                    password: password
                 })
             });
 
@@ -124,11 +126,13 @@ if (loginForm) {
                 Swal.fire({
                     icon: "error",
                     title: "Login Failed",
-                    text: data.message
+                    text: data.message || "Login failed"
                 });
             }
 
         } catch (error) {
+            console.error("LOGIN ERROR:", error);
+
             Swal.fire({
                 icon: "error",
                 title: "Server Error",
@@ -157,8 +161,8 @@ if (adminLoginForm) {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    email,
-                    password
+                    email: email,
+                    password: password
                 })
             });
 
@@ -166,7 +170,7 @@ if (adminLoginForm) {
 
             if (response.ok) {
 
-                if (data.user.role !== "admin") {
+                if (!data.user || data.user.role !== "admin") {
                     return Swal.fire({
                         icon: "error",
                         title: "Access Denied",
@@ -192,11 +196,13 @@ if (adminLoginForm) {
                 Swal.fire({
                     icon: "error",
                     title: "Login Failed",
-                    text: data.message
+                    text: data.message || "Login failed"
                 });
             }
 
         } catch (error) {
+            console.error("ADMIN LOGIN ERROR:", error);
+
             Swal.fire({
                 icon: "error",
                 title: "Server Error",
@@ -225,8 +231,8 @@ if (verifyEmailForm) {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    email,
-                    code
+                    email: email,
+                    code: code
                 })
             });
 
@@ -286,7 +292,7 @@ if (resendVerificationForm) {
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
-                        email
+                        email: email
                     })
                 }
             );
@@ -341,7 +347,7 @@ if (forgotPasswordForm) {
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
-                        email
+                        email: email
                     })
                 }
             );
@@ -423,9 +429,9 @@ if (resetPasswordForm) {
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
-                        email,
-                        code,
-                        newPassword
+                        email: email,
+                        code: code,
+                        newPassword: newPassword
                     })
                 }
             );
