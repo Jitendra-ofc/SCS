@@ -1,62 +1,42 @@
 const dns = require("dns");
 
-dns.setServers([
-    "8.8.8.8",
-    "8.8.4.4"
-]);
-
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
 require("dotenv").config();
-
 
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
 
-
 const authRoutes = require("./routes/authRoutes");
 const complaintRoutes = require("./routes/complaintRoutes");
 
-
 const app = express();
-
 
 const PORT = process.env.PORT || 5000;
 
 
-// ==========================================
-// CORS CONFIGURATION
-// MUST COME BEFORE ALL ROUTES
-// ==========================================
+// ========================================
+// CORS
+// ========================================
 
 app.use(cors({
-    origin: true,
-    methods: [
-        "GET",
-        "POST",
-        "PUT",
-        "PATCH",
-        "DELETE",
-        "OPTIONS"
-    ],
-    allowedHeaders: [
-        "Content-Type",
-        "Authorization"
-    ]
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
 
-// ==========================================
-// HANDLE PREFLIGHT REQUESTS
-// ==========================================
+// IMPORTANT:
+// DO NOT ADD:
+// app.options("*", cors());
+// This caused your Render deployment error.
 
-app.options("*", cors());
 
-
-// ==========================================
-// BODY MIDDLEWARE
-// ==========================================
+// ========================================
+// MIDDLEWARE
+// ========================================
 
 app.use(express.json());
 
@@ -65,37 +45,28 @@ app.use(express.urlencoded({
 }));
 
 
-// ==========================================
+// ========================================
 // STATIC FILES
-// ==========================================
+// ========================================
 
 app.use(
     "/uploads",
-    express.static(
-        path.join(__dirname, "uploads")
-    )
+    express.static(path.join(__dirname, "uploads"))
 );
 
 
-// ==========================================
+// ========================================
 // API ROUTES
-// ==========================================
+// ========================================
 
-app.use(
-    "/api/auth",
-    authRoutes
-);
+app.use("/api/auth", authRoutes);
 
-
-app.use(
-    "/api/complaints",
-    complaintRoutes
-);
+app.use("/api/complaints", complaintRoutes);
 
 
-// ==========================================
-// HOME TEST ROUTE
-// ==========================================
+// ========================================
+// TEST ROUTES
+// ========================================
 
 app.get("/", (req, res) => {
 
@@ -107,10 +78,6 @@ app.get("/", (req, res) => {
 });
 
 
-// ==========================================
-// API TEST ROUTE
-// ==========================================
-
 app.get("/api/test", (req, res) => {
 
     res.json({
@@ -121,18 +88,15 @@ app.get("/api/test", (req, res) => {
 });
 
 
-// ==========================================
+// ========================================
 // DATABASE + SERVER
-// ==========================================
+// ========================================
 
 mongoose
     .connect(process.env.MONGO_URI)
     .then(() => {
 
-        console.log(
-            "MongoDB Connected Successfully"
-        );
-
+        console.log("MongoDB Connected Successfully");
 
         app.listen(PORT, () => {
 
@@ -149,7 +113,6 @@ mongoose
             "MongoDB Connection Error:",
             error.message
         );
-
 
         process.exit(1);
 
