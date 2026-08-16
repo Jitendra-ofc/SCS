@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 
-
 const userSchema = new mongoose.Schema(
     {
         name: {
@@ -22,43 +21,13 @@ const userSchema = new mongoose.Schema(
             required: true,
         },
 
-        role: {
-            type: String,
-            enum: ["user", "admin"],
-            default: "user",
-        },
-
-        isVerified: {
-            type: Boolean,
-            default: false,
-        },
-
-
-        // ==========================
-        // EMAIL VERIFICATION
-        // ==========================
-
-        verificationCode: {
+        // Password reset fields
+        resetCode: {
             type: String,
             default: null,
         },
 
-        verificationCodeExpires: {
-            type: Date,
-            default: null,
-        },
-
-
-        // ==========================
-        // PASSWORD RESET
-        // ==========================
-
-        resetPasswordCode: {
-            type: String,
-            default: null,
-        },
-
-        resetPasswordExpires: {
+        resetCodeExpires: {
             type: Date,
             default: null,
         },
@@ -68,6 +37,4 @@ const userSchema = new mongoose.Schema(
     }
 );
 
-
-module.exports =
-    mongoose.model("User", userSchema);
+module.exports = mongoose.model("User", userSchema);
