@@ -411,6 +411,7 @@ const resendVerificationCode = async (req, res) => {
     try {
         const { email } = req.body;
 
+        console.log("=================================");
         console.log("RESEND REQUEST RECEIVED");
         console.log("Email:", email);
 
@@ -448,17 +449,17 @@ const resendVerificationCode = async (req, res) => {
             });
         }
 
+        // Generate new 6-digit verification code
         const verificationCode = generateVerificationCode();
 
         console.log("New verification code generated");
 
+        // Code expires in 10 minutes
         const verificationCodeExpires = new Date(
             Date.now() + 10 * 60 * 1000
         );
 
-        // Update only verification fields.
-        // This avoids validating old incomplete fields
-        // such as a missing name in an existing MongoDB document.
+        // Save new verification code
         await User.updateOne(
             {
                 _id: user._id,
@@ -473,32 +474,20 @@ const resendVerificationCode = async (req, res) => {
 
         console.log("Verification code saved successfully");
 
-        console.log("Attempting to send email through Brevo...");
+        // ==========================================
+        // DEMO MODE
+        // Skip Brevo SMTP to avoid connection timeout
+        // ==========================================
 
-        await sendEmail(
-            user.email,
-            "Your New Verification Code",
-            `
-            <h2>Email Verification</h2>
-
-            <p>Hello ${user.name || "User"},</p>
-
-            <p>Your new verification code is:</p>
-
-            <h1>${verificationCode}</h1>
-
-            <p>This code expires in 10 minutes.</p>
-            `
-        );
-
-        console.log(
-            "RESEND SUCCESS: Email sent successfully to",
-            user.email
-        );
+        console.log("=================================");
+        console.log("DEMO VERIFICATION CODE:", verificationCode);
+        console.log("Email sending skipped for demo");
+        console.log("Code is valid for 10 minutes");
+        console.log("=================================");
 
         return res.status(200).json({
             success: true,
-            message: "New verification code sent successfully",
+            message: "New verification code generated successfully",
         });
 
     } catch (error) {
@@ -517,7 +506,6 @@ const resendVerificationCode = async (req, res) => {
         });
     }
 };
-
 
 // ==========================================
 // FORGOT PASSWORD
