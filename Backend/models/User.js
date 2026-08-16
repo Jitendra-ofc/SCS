@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema(
         name: {
             type: String,
             required: true,
-            trim: true,
+            trim: true
         },
 
         email: {
@@ -13,27 +13,47 @@ const userSchema = new mongoose.Schema(
             required: true,
             unique: true,
             lowercase: true,
-            trim: true,
+            trim: true
         },
 
         password: {
             type: String,
-            required: true,
+            required: true
         },
 
-        // Password reset fields
+        role: {
+            type: String,
+            enum: ["user", "admin"],
+            default: "user"
+        },
+
+        isVerified: {
+            type: Boolean,
+            default: false
+        },
+
+        verificationCode: {
+            type: String,
+            default: null
+        },
+
+        verificationCodeExpires: {
+            type: Date,
+            default: null
+        },
+
         resetCode: {
             type: String,
-            default: null,
+            default: null
         },
 
         resetCodeExpires: {
             type: Date,
-            default: null,
-        },
+            default: null
+        }
     },
     {
-        timestamps: true,
+        timestamps: true
     }
 );
 
