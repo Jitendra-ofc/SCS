@@ -1,66 +1,174 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Resend Verification Code</title>
 
-    <link rel="stylesheet" href="style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: #eef2ff;
+        }
 
+        .main-content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+        }
+
+        .container {
+            width: 450px;
+            max-width: 100%;
+            background: white;
+            padding: 45px;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            text-align: center;
+        }
+
+        h1 {
+            color: #3156a3;
+            font-size: 28px;
+            margin-bottom: 25px;
+        }
+
+        p {
+            color: #222;
+            font-size: 17px;
+            line-height: 1.5;
+            margin-bottom: 28px;
+        }
+
+        input {
+            width: 100%;
+            padding: 16px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #3156a3;
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 10px;
+            background: #3156b8;
+            color: white;
+            font-size: 17px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #25479c;
+        }
+
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .message {
+            margin-top: 15px;
+            font-size: 15px;
+            font-weight: bold;
+            min-height: 22px;
+        }
+
+        .success {
+            color: green;
+        }
+
+        .error {
+            color: red;
+        }
+
+        .links {
+            margin-top: 25px;
+            font-size: 16px;
+        }
+
+        .links a {
+            color: #3156a3;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #ddd;
+            color: #555;
+            font-size: 16px;
+        }
+    </style>
 </head>
 
-<body class="auth-page">
+<body>
 
-    <div class="container">
+    <div class="main-content">
 
-        <h2>📧 Resend Verification Code</h2>
+        <div class="container">
 
-        <p style="margin-bottom: 20px;">
-            Enter your registered email address and we will send you a new
-            6-digit verification code.
-        </p>
+            <h1>📧 Resend Verification Code</h1>
 
-        <form id="resendVerificationForm">
+            <p>
+                Enter your registered email address and we will
+                send you a new 6-digit verification code.
+            </p>
 
             <input
                 type="email"
                 id="email"
-                placeholder="Email Address"
+                placeholder="Enter your email address"
                 required
             >
 
-            <button type="submit">
+            <button
+                type="button"
+                id="resendBtn"
+            >
                 Send New Verification Code
             </button>
 
-        </form>
+            <div id="message" class="message"></div>
 
-        <p style="margin-top: 20px;">
-            Already have a verification code?
-            <a href="verify-email.html">Verify Email</a>
-        </p>
+            <div class="links">
+                Already have a verification code?
+                <a href="verify-email.html">Verify Email</a>
 
-        <p>
-            <a href="login.html">Back to Login</a>
-        </p>
+                <br><br>
+
+                <a href="login.html">Back to Login</a>
+            </div>
+
+        </div>
 
     </div>
-
-    <script>
-        // Automatically fill the email used during registration
-        const verificationEmail = localStorage.getItem("verificationEmail");
-
-        if (verificationEmail) {
-            document.getElementById("email").value = verificationEmail;
-        }
-    </script>
-
-    <script src="script.js"></script>
 
     <footer>
         © 2026 Smart Complaint Management System
@@ -68,6 +176,132 @@
         Developed by Jitendra
     </footer>
 
-</body>
 
+    <script>
+
+        // ==========================================
+        // BACKEND API URL
+        // ==========================================
+
+        const API_URL =
+            "https://scs-web-service.onrender.com/api/auth/resend-verification";
+
+
+        // ==========================================
+        // GET ELEMENTS
+        // ==========================================
+
+        const resendBtn = document.getElementById("resendBtn");
+        const emailInput = document.getElementById("email");
+        const message = document.getElementById("message");
+
+
+        // ==========================================
+        // RESEND VERIFICATION CODE
+        // ==========================================
+
+        resendBtn.addEventListener("click", async function () {
+
+            const email = emailInput.value.trim();
+
+
+            // Clear previous message
+            message.textContent = "";
+            message.className = "message";
+
+
+            // Validate email
+            if (!email) {
+
+                message.textContent =
+                    "Please enter your email address.";
+
+                message.classList.add("error");
+
+                return;
+            }
+
+
+            // Disable button while sending
+            resendBtn.disabled = true;
+
+            const originalText = resendBtn.textContent;
+
+            resendBtn.textContent = "Sending...";
+
+
+            try {
+
+                console.log(
+                    "Sending resend request for:",
+                    email
+                );
+
+
+                const response = await fetch(API_URL, {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        email: email
+                    })
+
+                });
+
+
+                const data = await response.json();
+
+
+                console.log("Server response:", data);
+
+
+                if (response.ok) {
+
+                    message.textContent =
+                        data.message ||
+                        "Verification code sent successfully! Check your email.";
+
+                    message.classList.add("success");
+
+                } else {
+
+                    message.textContent =
+                        data.message ||
+                        "Failed to send verification code.";
+
+                    message.classList.add("error");
+
+                }
+
+
+            } catch (error) {
+
+                console.error(
+                    "RESEND VERIFICATION ERROR:",
+                    error
+                );
+
+
+                message.textContent =
+                    "Unable to connect to the server. Please try again.";
+
+                message.classList.add("error");
+
+            }
+
+
+            // Enable button again
+            resendBtn.disabled = false;
+
+            resendBtn.textContent = originalText;
+
+        });
+
+    </script>
+
+</body>
 </html>
