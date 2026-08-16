@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Verify Email</title>
+
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body class="auth-page">
+
+    <div class="container">
+
+        <h2>📧 Verify Your Email</h2>
+
+        <p>Please enter your email address and the verification code sent to your email.</p>
+
+        <form id="verifyEmailForm">
+
+            <input
+                type="email"
+                id="email"
+                placeholder="Email Address"
+                required
+            >
+
+            <input
+                type="text"
+                id="code"
+                placeholder="Verification Code"
+                required
+            >
+
+            <button type="submit">
+                Verify Email
+            </button>
+
+        </form>
+
+        <br>
+
+        <p>
+            Didn't receive the verification code?
+            <a href="resend-verification.html">
+                Resend Code
+            </a>
+        </p>
+
+        <p>
+            Already verified?
+            <a href="login.html">
+                Login
+            </a>
+        </p>
+
+    </div>
+
+    <script src="script.js"></script>
+
+    <script>
+        const savedEmail = localStorage.getItem("verificationEmail");
+
+        if (savedEmail) {
+            document.getElementById("email").value = savedEmail;
+        }
+    </script>
+
+    <footer>
+        © 2026 Smart Complaint Management System
+        <br>
+        Developed by Jitendra
+    </footer>
+
+</body>
+
+</html>

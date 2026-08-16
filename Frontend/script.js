@@ -9,28 +9,44 @@ if (registerForm) {
     registerForm.addEventListener("submit", async (e) => {
         e.preventDefault();
 
-        const name = document.getElementById("fullName").value.trim();
-        const email = document.getElementById("email").value.trim();
-        const password = document.getElementById("password").value;
+        const fullName = document
+            .getElementById("fullName")
+            .value
+            .trim();
+
+        const email = document
+            .getElementById("email")
+            .value
+            .trim();
+
+        const password = document
+            .getElementById("password")
+            .value;
 
         try {
-            const response = await fetch(`${BASE_URL}/auth/register`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    name,
-                    email,
-                    password
-                })
-            });
+            const response = await fetch(
+                `${BASE_URL}/auth/register`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        fullName,
+                        email,
+                        password
+                    })
+                }
+            );
 
             const data = await response.json();
 
             if (response.ok) {
 
-                localStorage.setItem("verificationEmail", email);
+                localStorage.setItem(
+                    "verificationEmail",
+                    email
+                );
 
                 Swal.fire({
                     icon: "success",
@@ -77,32 +93,42 @@ if (loginForm) {
     loginForm.addEventListener("submit", async (e) => {
         e.preventDefault();
 
-        const email = document.getElementById("email").value.trim();
-        const password = document.getElementById("password").value;
+        const email = document
+            .getElementById("email")
+            .value
+            .trim();
+
+        const password = document
+            .getElementById("password")
+            .value;
 
         try {
-            const response = await fetch(`${BASE_URL}/auth/login`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    email,
-                    password
-                })
-            });
+            const response = await fetch(
+                `${BASE_URL}/auth/login`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        email,
+                        password
+                    })
+                }
+            );
 
             const data = await response.json();
 
             if (response.ok) {
 
-                // Save token
                 localStorage.setItem("token", data.token);
 
-                // Save user with consistent name field
                 const user = {
                     id: data.user?.id || data.user?._id || "",
-                    name: data.user?.name || "",
+                    fullName:
+                        data.user?.fullName ||
+                        data.user?.name ||
+                        "",
                     email: data.user?.email || "",
                     role: data.user?.role || "user"
                 };
@@ -135,10 +161,13 @@ if (loginForm) {
                     Swal.fire({
                         icon: "warning",
                         title: "Email Not Verified",
-                        text: data.message || "Please verify your email.",
+                        text:
+                            data.message ||
+                            "Please verify your email.",
                         confirmButtonText: "Verify Email"
                     }).then(() => {
-                        window.location.href = "verify-email.html";
+                        window.location.href =
+                            "verify-email.html";
                     });
 
                     return;
@@ -176,43 +205,63 @@ if (adminLoginForm) {
     adminLoginForm.addEventListener("submit", async (e) => {
         e.preventDefault();
 
-        const email = document.getElementById("email").value.trim();
-        const password = document.getElementById("password").value;
+        const email = document
+            .getElementById("email")
+            .value
+            .trim();
+
+        const password = document
+            .getElementById("password")
+            .value;
 
         try {
-            const response = await fetch(`${BASE_URL}/auth/login`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    email,
-                    password
-                })
-            });
+            const response = await fetch(
+                `${BASE_URL}/auth/login`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        email,
+                        password
+                    })
+                }
+            );
 
             const data = await response.json();
 
             if (response.ok) {
 
-                if (!data.user || data.user.role !== "admin") {
-
+                if (
+                    !data.user ||
+                    data.user.role !== "admin"
+                ) {
                     return Swal.fire({
                         icon: "error",
                         title: "Access Denied",
-                        text: "This account is not an administrator."
+                        text:
+                            "This account is not an administrator."
                     });
-
                 }
 
                 const user = {
-                    id: data.user.id || data.user._id || "",
-                    name: data.user.name || "",
+                    id:
+                        data.user.id ||
+                        data.user._id ||
+                        "",
+                    fullName:
+                        data.user.fullName ||
+                        data.user.name ||
+                        "",
                     email: data.user.email || "",
                     role: data.user.role
                 };
 
-                localStorage.setItem("token", data.token);
+                localStorage.setItem(
+                    "token",
+                    data.token
+                );
 
                 localStorage.setItem(
                     "user",
@@ -227,7 +276,8 @@ if (adminLoginForm) {
                 });
 
                 setTimeout(() => {
-                    window.location.href = "admin-dashboard.html";
+                    window.location.href =
+                        "admin-dashboard.html";
                 }, 1200);
 
             } else {
@@ -235,14 +285,18 @@ if (adminLoginForm) {
                 Swal.fire({
                     icon: "error",
                     title: "Login Failed",
-                    text: data.message || "Login failed"
+                    text:
+                        data.message || "Login failed"
                 });
 
             }
 
         } catch (error) {
 
-            console.error("ADMIN LOGIN ERROR:", error);
+            console.error(
+                "ADMIN LOGIN ERROR:",
+                error
+            );
 
             Swal.fire({
                 icon: "error",
@@ -261,129 +315,181 @@ const verifyEmailForm =
     document.getElementById("verifyEmailForm");
 
 if (verifyEmailForm) {
-    verifyEmailForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
+    const savedEmail =
+        localStorage.getItem("verificationEmail");
 
-        const email = document.getElementById("email").value.trim();
-        const code = document.getElementById("code").value.trim();
+    if (savedEmail) {
+        const emailInput =
+            document.getElementById("email");
 
-        try {
-            const response = await fetch(`${BASE_URL}/auth/verify-email`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    email,
-                    code
-                })
-            });
+        if (emailInput) {
+            emailInput.value = savedEmail;
+        }
+    }
 
-            const data = await response.json();
+    verifyEmailForm.addEventListener(
+        "submit",
+        async (e) => {
+            e.preventDefault();
 
-            if (response.ok) {
+            const email = document
+                .getElementById("email")
+                .value
+                .trim();
 
-                localStorage.removeItem("verificationEmail");
+            const code = document
+                .getElementById("code")
+                .value
+                .trim();
 
-                Swal.fire({
-                    icon: "success",
-                    title: "Email Verified!",
-                    text: data.message,
-                    timer: 2000,
-                    showConfirmButton: false
-                });
+            try {
+                const response = await fetch(
+                    `${BASE_URL}/auth/verify-email`,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+                        body: JSON.stringify({
+                            email,
+                            code
+                        })
+                    }
+                );
 
-                setTimeout(() => {
-                    window.location.href = "login.html";
-                }, 2000);
+                const data = await response.json();
 
-            } else {
+                if (response.ok) {
+
+                    localStorage.removeItem(
+                        "verificationEmail"
+                    );
+
+                    Swal.fire({
+                        icon: "success",
+                        title: "Email Verified!",
+                        text:
+                            data.message ||
+                            "Email verified successfully.",
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+
+                    setTimeout(() => {
+                        window.location.href =
+                            "login.html";
+                    }, 2000);
+
+                } else {
+
+                    Swal.fire({
+                        icon: "error",
+                        title: "Verification Failed",
+                        text:
+                            data.message ||
+                            "Verification failed"
+                    });
+
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "VERIFY EMAIL ERROR:",
+                    error
+                );
 
                 Swal.fire({
                     icon: "error",
-                    title: "Verification Failed",
-                    text: data.message || "Verification failed"
+                    title: "Server Error",
+                    text:
+                        "Could not connect to the server."
                 });
 
             }
-
-        } catch (error) {
-
-            console.error("VERIFY EMAIL ERROR:", error);
-
-            Swal.fire({
-                icon: "error",
-                title: "Server Error",
-                text: "Could not connect to the server."
-            });
-
         }
-    });
+    );
 }
 
 
 // ================= RESEND VERIFICATION =================
 
 const resendVerificationForm =
-    document.getElementById("resendVerificationForm");
+    document.getElementById(
+        "resendVerificationForm"
+    );
 
 if (resendVerificationForm) {
-    resendVerificationForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
+    resendVerificationForm.addEventListener(
+        "submit",
+        async (e) => {
+            e.preventDefault();
 
-        const email = document.getElementById("email").value.trim();
+            const email = document
+                .getElementById("email")
+                .value
+                .trim();
 
-        try {
-            const response = await fetch(
-                `${BASE_URL}/auth/resend-verification`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
+            try {
+                const response = await fetch(
+                    `${BASE_URL}/auth/resend-verification`,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+                        body: JSON.stringify({
+                            email
+                        })
+                    }
+                );
+
+                const data = await response.json();
+
+                if (response.ok) {
+
+                    localStorage.setItem(
+                        "verificationEmail",
                         email
-                    })
+                    );
+
+                    Swal.fire({
+                        icon: "success",
+                        title: "Code Sent",
+                        text: data.message
+                    });
+
+                } else {
+
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text:
+                            data.message ||
+                            "Could not resend code"
+                    });
+
                 }
-            );
 
-            const data = await response.json();
+            } catch (error) {
 
-            if (response.ok) {
-
-                localStorage.setItem(
-                    "verificationEmail",
-                    email
+                console.error(
+                    "RESEND ERROR:",
+                    error
                 );
 
                 Swal.fire({
-                    icon: "success",
-                    title: "Code Sent",
-                    text: data.message
-                });
-
-            } else {
-
-                Swal.fire({
                     icon: "error",
-                    title: "Error",
-                    text: data.message || "Could not resend code"
+                    title: "Server Error",
+                    text:
+                        "Could not connect to the server."
                 });
 
             }
-
-        } catch (error) {
-
-            console.error("RESEND ERROR:", error);
-
-            Swal.fire({
-                icon: "error",
-                title: "Server Error",
-                text: "Could not connect to the server."
-            });
-
         }
-    });
+    );
 }
 
 
@@ -393,68 +499,82 @@ const forgotPasswordForm =
     document.getElementById("forgotPasswordForm");
 
 if (forgotPasswordForm) {
-    forgotPasswordForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
+    forgotPasswordForm.addEventListener(
+        "submit",
+        async (e) => {
+            e.preventDefault();
 
-        const email = document.getElementById("email").value.trim();
+            const email = document
+                .getElementById("email")
+                .value
+                .trim();
 
-        try {
-            const response = await fetch(
-                `${BASE_URL}/auth/forgot-password`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
+            try {
+                const response = await fetch(
+                    `${BASE_URL}/auth/forgot-password`,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+                        body: JSON.stringify({
+                            email
+                        })
+                    }
+                );
+
+                const data = await response.json();
+
+                if (response.ok) {
+
+                    localStorage.setItem(
+                        "resetEmail",
                         email
-                    })
+                    );
+
+                    Swal.fire({
+                        icon: "success",
+                        title: "Reset Code Sent",
+                        text: data.message,
+                        timer: 2200,
+                        showConfirmButton: false
+                    });
+
+                    setTimeout(() => {
+                        window.location.href =
+                            "reset-password.html";
+                    }, 2200);
+
+                } else {
+
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text:
+                            data.message ||
+                            "Could not send reset code"
+                    });
+
                 }
-            );
 
-            const data = await response.json();
+            } catch (error) {
 
-            if (response.ok) {
-
-                localStorage.setItem(
-                    "resetEmail",
-                    email
+                console.error(
+                    "FORGOT PASSWORD ERROR:",
+                    error
                 );
 
                 Swal.fire({
-                    icon: "success",
-                    title: "Reset Code Sent",
-                    text: data.message,
-                    timer: 2200,
-                    showConfirmButton: false
-                });
-
-                setTimeout(() => {
-                    window.location.href = "reset-password.html";
-                }, 2200);
-
-            } else {
-
-                Swal.fire({
                     icon: "error",
-                    title: "Error",
-                    text: data.message || "Could not send reset code"
+                    title: "Server Error",
+                    text:
+                        "Could not connect to the server."
                 });
 
             }
-
-        } catch (error) {
-
-            console.error("FORGOT PASSWORD ERROR:", error);
-
-            Swal.fire({
-                icon: "error",
-                title: "Server Error",
-                text: "Could not connect to the server."
-            });
-
         }
-    });
+    );
 }
 
 
@@ -464,92 +584,118 @@ const resetPasswordForm =
     document.getElementById("resetPasswordForm");
 
 if (resetPasswordForm) {
-    resetPasswordForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
+    resetPasswordForm.addEventListener(
+        "submit",
+        async (e) => {
+            e.preventDefault();
 
-        const email = document.getElementById("email").value.trim();
-        const code = document.getElementById("code").value.trim();
+            const email = document
+                .getElementById("email")
+                .value
+                .trim();
 
-        const newPassword =
-            document.getElementById("newPassword").value;
+            const code = document
+                .getElementById("code")
+                .value
+                .trim();
 
-        const confirmPassword =
-            document.getElementById("confirmPassword").value;
+            const newPassword = document
+                .getElementById("newPassword")
+                .value;
 
-        if (newPassword !== confirmPassword) {
+            const confirmPassword = document
+                .getElementById("confirmPassword")
+                .value;
 
-            return Swal.fire({
-                icon: "error",
-                title: "Passwords Do Not Match",
-                text: "Please enter the same password in both fields."
-            });
+            if (newPassword !== confirmPassword) {
 
-        }
-
-        if (newPassword.length < 6) {
-
-            return Swal.fire({
-                icon: "warning",
-                title: "Password Too Short",
-                text: "Password must be at least 6 characters."
-            });
-
-        }
-
-        try {
-            const response = await fetch(
-                `${BASE_URL}/auth/reset-password`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        email,
-                        code,
-                        newPassword
-                    })
-                }
-            );
-
-            const data = await response.json();
-
-            if (response.ok) {
-
-                localStorage.removeItem("resetEmail");
-
-                Swal.fire({
-                    icon: "success",
-                    title: "Password Reset Successful",
-                    text: data.message,
-                    timer: 2200,
-                    showConfirmButton: false
-                });
-
-                setTimeout(() => {
-                    window.location.href = "login.html";
-                }, 2200);
-
-            } else {
-
-                Swal.fire({
+                return Swal.fire({
                     icon: "error",
-                    title: "Password Reset Failed",
-                    text: data.message || "Password reset failed"
+                    title: "Passwords Do Not Match",
+                    text:
+                        "Please enter the same password in both fields."
                 });
 
             }
 
-        } catch (error) {
+            if (newPassword.length < 6) {
 
-            console.error("RESET PASSWORD ERROR:", error);
+                return Swal.fire({
+                    icon: "warning",
+                    title: "Password Too Short",
+                    text:
+                        "Password must be at least 6 characters."
+                });
 
-            Swal.fire({
-                icon: "error",
-                title: "Server Error",
-                text: "Could not connect to the server."
-            });
+            }
 
+            try {
+                const response = await fetch(
+                    `${BASE_URL}/auth/reset-password`,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+                        body: JSON.stringify({
+                            email,
+                            code,
+                            newPassword
+                        })
+                    }
+                );
+
+                const data = await response.json();
+
+                if (response.ok) {
+
+                    localStorage.removeItem(
+                        "resetEmail"
+                    );
+
+                    Swal.fire({
+                        icon: "success",
+                        title:
+                            "Password Reset Successful",
+                        text: data.message,
+                        timer: 2200,
+                        showConfirmButton: false
+                    });
+
+                    setTimeout(() => {
+                        window.location.href =
+                            "login.html";
+                    }, 2200);
+
+                } else {
+
+                    Swal.fire({
+                        icon: "error",
+                        title:
+                            "Password Reset Failed",
+                        text:
+                            data.message ||
+                            "Password reset failed"
+                    });
+
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "RESET PASSWORD ERROR:",
+                    error
+                );
+
+                Swal.fire({
+                    icon: "error",
+                    title: "Server Error",
+                    text:
+                        "Could not connect to the server."
+                });
+
+            }
         }
-    });
+    );
 }
