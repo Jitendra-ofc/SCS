@@ -6,23 +6,23 @@ const {
     registerUser,
     loginUser,
     forgotPassword,
-    resetPassword,
+    resetPassword
 } = require("../controllers/authControllers");
 
 
-// Register
+// REGISTER USER
 router.post("/register", registerUser);
 
 
-// Login
+// LOGIN USER
 router.post("/login", loginUser);
 
 
-// Forgot password - sends code
+// FORGOT PASSWORD
 router.post("/forgot-password", forgotPassword);
 
 
-// Reset password - checks code and changes password
+// RESET PASSWORD
 router.post("/reset-password", resetPassword);
 
 
